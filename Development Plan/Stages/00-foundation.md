@@ -18,7 +18,7 @@
 - [x] `P0.10` Создать пустые `Bootstrap` и `Gameplay` scenes; добавить `Bootstrap` первой сценой Build Settings.
 - [x] `P0.11` Создать `AppLifetimeScope` и `GameplayLifetimeScope` с одной простой тестовой регистрацией; проверить создание и disposal scope без ошибок.
 - [x] `P0.12` Добавить один проходящий EditMode smoke-test, чтобы проверить корректность test assemblies.
-- [ ] `P0.13` Реализовать минимальный bootstrap flow: при запуске `Bootstrap` один раз загрузить `Gameplay` additively, сохранить `AppLifetimeScope` на время работы приложения и явно связать `GameplayLifetimeScope` с app scope как дочерний.
+- [ ] `P0.13` Создать prefab `AppLifetimeScope` и назначить его Project root scope через `VContainerSettings`; убрать scene-instance из `Bootstrap`. Зарегистрировать prefab `SceneNavigator` с сериализуемыми `SceneReference` на `Bootstrap` и `Gameplay` и один раз загрузить `Gameplay` в режиме `Single`. Проверить в Unity Editor, что app scope переживает смену сцены, а `GameplayLifetimeScope` автоматически становится дочерним.
 - [ ] `P0.14` Добавить PlayMode smoke-test запуска из `Bootstrap`: дождаться загрузки `Gameplay`, проверить наличие обоих scopes, успешную инициализацию Addressables и DOTween и отсутствие ошибок при завершении.
 - [ ] `P0.15` Сделать baseline commit/tag, от которого можно сравнивать последующие изменения.
 

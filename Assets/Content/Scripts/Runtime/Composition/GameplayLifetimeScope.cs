@@ -8,8 +8,9 @@ namespace Arkanoid
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterEntryPoint<ScopeLifetimeProbe>(Lifetime.Scoped)
+            builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)
                 .WithParameter("scopeName", nameof(GameplayLifetimeScope));
+            builder.RegisterBuildCallback(resolver => resolver.Resolve<ScopeLifetimeProbe>());
         }
     }
 }

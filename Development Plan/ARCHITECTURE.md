@@ -76,7 +76,7 @@ Unity input/physics/UI ──> Runtime adapters ──> Core rules
 
 ## VContainer scopes
 
-- `AppLifetimeScope` в `Bootstrap` хранит долгоживущую инфраструктуру: navigation, level catalog/loader, audio service и фабрику уровня.
+- `AppLifetimeScope` создаётся из project root prefab через `VContainerSettings` и переживает смену сцен. Он регистрирует долгоживущую инфраструктуру: navigation, level catalog/loader, audio service и фабрику уровня. `SceneNavigator` создаётся из отдельного prefab; ссылки на сцены задаются через `SceneReference` в Inspector.
 - `GameplayLifetimeScope` создаёт session-scoped сервисы: `GameSession`, `ScoreService`, `BonusService`, gameplay presenters/controllers.
 - Уровень получает отдельный дочерний scope или явный `LevelContext`, который уничтожается при смене уровня.
 - Обычные C# entry points регистрируются через VContainer lifecycle interfaces только когда им действительно нужен Unity PlayerLoop.

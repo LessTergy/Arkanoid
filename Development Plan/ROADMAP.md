@@ -39,7 +39,7 @@ docs: add architecture and verification guide
 
 ## Идеи только после Release Gate
 
-- управление платформой мышью и touch;
+- управление платформой мышью;
 - multi-ball с корректным условием потери жизни;
 - временные эффекты с duration/stacking policy;
 - object pooling для pickups/particles;

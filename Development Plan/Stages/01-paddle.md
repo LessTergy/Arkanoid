@@ -7,8 +7,8 @@
 ## Задачи
 
 - [x] `P1.1` Настроить orthographic camera и игровую область под портретные 9:16; определить единицы поля и безопасные границы.
-- [ ] `P1.2` Создать слои `Paddle`, `Ball`, `Brick`, `Wall`, `Pickup`, `DeathZone` и collision matrix с минимально нужными взаимодействиями.
-- [ ] `P1.3` Создать prefab `Paddle` с `Rigidbody2D`, collider и простым SpriteRenderer.
+- [x] `P1.2` Создать слои `Paddle`, `Ball`, `Brick`, `Wall`, `Pickup`, `DeathZone` и collision matrix с минимально нужными взаимодействиями.
+- [x] `P1.3` Создать prefab `Paddle` с `Rigidbody2D`, collider и простым SpriteRenderer.
 - [ ] `P1.4` Создать `PaddleConfig` со speed и width; границы движения получать из `PlayfieldCamera.WorldBounds`.
 - [ ] `P1.5` Реализовать `IPlayerInput` adapter над Input System для сенсорного ввода с keyboard/gamepad fallback в Editor. Gameplay-код не должен читать устройства напрямую.
 - [ ] `P1.6` Реализовать `PaddleMovement`: получать намерение игрока через `IPlayerInput`, двигаться в physics tick и ограничивать центр платформы границами поля с учётом половины её ширины.
@@ -22,6 +22,12 @@
 - Границы поля в мировых координатах: `x ∈ [-5.4, 5.4]`, `y ∈ [-8.6, 10.6]`. Для центра платформы допустимы `x ∈ [left + width/2, right - width/2]`.
 - `PlayfieldCamera` увеличивает видимую область при другом соотношении сторон, сохраняя логическое поле полностью видимым. Дополнительное пространство камеры не расширяет gameplay-границы.
 - Вырезы экрана и системные панели учитываются при размещении UI через `Screen.safeArea` на этапе 10; границы движения платформы задаёт логическое поле.
+
+## Слои и контакты 2D Physics
+
+- Разрешённые пары: `Ball–Paddle`, `Ball–Brick`, `Ball–Wall`, `Ball–DeathZone`, `Pickup–Paddle`, `Pickup–DeathZone`.
+- `Pickup` и `DeathZone` используют trigger-коллайдеры. `Paddle` ограничивается границами поля программно, поэтому контакт с `Wall` ему не нужен.
+- Все остальные пары с участием новых слоёв отключены; взаимодействия между стандартными слоями Unity сохранены. При создании соответствующих prefab и объектов назначать им одноимённые слои.
 
 ## Gate 1
 

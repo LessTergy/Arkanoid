@@ -1,0 +1,23 @@
+{
+    "name": "Arkanoid.Tests.EditMode",
+    "rootNamespace": "Arkanoid.Tests.EditMode",
+    "references": [
+        "GUID:c2e514f7186244d194f7f415be1c6089"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

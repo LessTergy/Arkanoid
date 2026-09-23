@@ -68,7 +68,7 @@
 - определены `DOTWEEN` и `UNITASK_DOTWEEN_SUPPORT`;
 - Unity Test Framework `1.6.0`;
 - Addressables пока не установлен;
-- в Build Settings находится только `Assets/Scenes/SampleScene.unity`;
+- в Build Settings находится только `Assets/Content/Scenes/SampleScene.unity`;
 - собственных C#-скриптов пока нет.
 
 `productName` сейчас записан как `Arcanoid`, тогда как проект и документы используют `Arkanoid`. Исправление включено в этап 0.

@@ -12,5 +12,6 @@ EditorBuildSettings:
     path: Assets/Content/Scenes/Gameplay.unity
     guid: 9954e99ccdf2da242a6b0842e55e067e
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 03d2c30c7c4a9484bad5047110edff0f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

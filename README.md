@@ -16,3 +16,7 @@
 2. Открыть проект в Unity `6000.3.18f1` и дождаться импорта assets и компиляции scripts.
 3. Открыть сцену `Assets/Content/Scenes/Bootstrap.unity`.
 4. Нажать Play.
+
+## Проверка
+
+В Unity Test Runner выбрать PlayMode и запустить `BootstrapSmokeTests`. Тест проверяет переход между сценами, сроки жизни VContainer scopes и инициализацию Addressables и DOTween. Обычный запуск `Bootstrap` через Play проверяет автоматический старт отдельно: Test Runner создаёт корневой scope до начала тела теста.

@@ -18,15 +18,15 @@
 - [x] `P0.10` Создать пустые `Bootstrap` и `Gameplay` scenes; добавить `Bootstrap` первой сценой Build Settings.
 - [x] `P0.11` Создать `AppLifetimeScope` и `GameplayLifetimeScope` с одной простой тестовой регистрацией; проверить создание и disposal scope без ошибок.
 - [x] `P0.12` Добавить один проходящий EditMode smoke-test, чтобы проверить корректность test assemblies.
-- [ ] `P0.13` Создать prefab `AppLifetimeScope` и назначить его Project root scope через `VContainerSettings`; убрать scene-instance из `Bootstrap`. Зарегистрировать prefab `SceneNavigator` с сериализуемыми `SceneReference` на `Bootstrap` и `Gameplay` и один раз загрузить `Gameplay` в режиме `Single`. Проверить в Unity Editor, что app scope переживает смену сцены, а `GameplayLifetimeScope` автоматически становится дочерним.
-- [ ] `P0.14` Добавить PlayMode smoke-test запуска из `Bootstrap`: дождаться загрузки `Gameplay`, проверить наличие обоих scopes, успешную инициализацию Addressables и DOTween и отсутствие ошибок при завершении.
-- [ ] `P0.15` Сделать baseline commit/tag, от которого можно сравнивать последующие изменения.
+- [x] `P0.13` Создать prefab `AppLifetimeScope` и назначить его Project root scope через `VContainerSettings`; убрать scene-instance из `Bootstrap`. Зарегистрировать prefab `SceneNavigator` с сериализуемыми `SceneReference` на `Bootstrap` и `Gameplay` и один раз загрузить `Gameplay` в режиме `Single`. Проверить в Unity Editor, что app scope переживает смену сцены, а `GameplayLifetimeScope` автоматически становится дочерним.
+- [x] `P0.14` Добавить PlayMode smoke-test навигации из `Bootstrap`: дождаться загрузки `Gameplay`, проверить наличие обоих scopes, успешную инициализацию Addressables и DOTween, disposal gameplay scope и отсутствие ошибок. Автоматический переход при обычном Play из `Bootstrap` проверить отдельно.
+- [x] `P0.15` Сделать baseline commit/tag, от которого можно сравнивать последующие изменения.
 
 ## Gate 0
 
-- [ ] Проект компилируется с нулём ошибок.
-- [ ] `Bootstrap` запускает `Gameplay`.
-- [ ] Test Runner видит EditMode и PlayMode assemblies.
-- [ ] Addressables и DOTween проходят базовую инициализацию.
+- [x] Проект компилируется с нулём ошибок.
+- [x] `Bootstrap` запускает `Gameplay`.
+- [x] Test Runner видит EditMode и PlayMode assemblies.
+- [x] Addressables и DOTween проходят базовую инициализацию.
 
 После прохождения Gate обновить статус в [индексе](../README.md) и перейти к [этапу 1](01-paddle.md).

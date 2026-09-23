@@ -52,6 +52,8 @@ Assets/Content/
 
 Не нужно дробить проект на большее число runtime assemblies без реальной причины.
 
+PlayMode Test Runner создаёт project root scope до запуска тела теста. Поэтому smoke-test навигации сам открывает `Bootstrap` и вызывает зарегистрированный `SceneNavigator`; одноразовый автоматический переход `Bootstrap` → `Gameplay` дополнительно проверяется обычным запуском Play из `Bootstrap`.
+
 ## Направление зависимостей
 
 ```text

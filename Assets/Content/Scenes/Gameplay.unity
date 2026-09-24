@@ -281,6 +281,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1830270793}
   - component: {fileID: 1830270792}
+  - component: {fileID: 1830270794}
   m_Layer: 0
   m_Name: GameplayLifetimeScope
   m_TagString: Untagged
@@ -304,6 +305,7 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
+  _playerInput: {fileID: 1830270794}
 --- !u!4 &1830270793
 Transform:
   m_ObjectHideFlags: 0
@@ -319,6 +321,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1830270794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830270791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8df8fcc1009edd4fb54715aaaa4ad13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Input.InputSystemPlayerInput
+  _move: {fileID: -3067279064848801417, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  _touchPosition: {fileID: 1054282129858755337, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  _touchPress: {fileID: 7727331191058189592, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  _launch: {fileID: -1662433362842397026, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  _pause: {fileID: 1909091380364833303, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  _gameplayCamera: {fileID: 330585545}
 --- !u!1001 &2465481494322928950
 PrefabInstance:
   m_ObjectHideFlags: 0

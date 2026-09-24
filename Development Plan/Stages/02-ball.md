@@ -6,8 +6,8 @@
 
 ## Задачи
 
-- [ ] `P2.1` Создать prefab `Ball` с `Rigidbody2D`, `CircleCollider2D` и frictionless/bouncy `PhysicsMaterial2D`.
-- [ ] `P2.2` Создать `BallConfig`: speed, launch angle range, minimum vertical component, maximum correction threshold.
+- [x] `P2.1` Создать prefab `Ball` с `Rigidbody2D`, `CircleCollider2D` и frictionless/bouncy `PhysicsMaterial2D`.
+- [ ] `P2.2` Создать `BallConfig`: speed, launch angle range, minimum vertical component.
 - [ ] `P2.3` Реализовать состояния мяча `Attached`, `Flying`, `Lost`.
 - [ ] `P2.4` В состоянии `Attached` удерживать мяч относительно платформы; по `Launch` задавать нормализованное стартовое направление.
 - [ ] `P2.5` Поддерживать постоянную целевую скорость мяча после столкновений без разгона от physics solver.
@@ -16,6 +16,12 @@
 - [ ] `P2.8` Создать стены сверху/слева/справа и trigger `DeathZone` снизу.
 - [ ] `P2.9` Добавить визуальный debug режима направления/скорости только для Editor/Development Build.
 - [ ] `P2.10` Добавить тесты расчёта launch direction и paddle bounce direction.
+
+## Правила движения
+
+- В свободном полёте мяч движется по прямой; стены отражают направление, а точка контакта с платформой задаёт новый угол отскока. Скорость удерживается на целевом значении из `BallConfig`.
+- `minimum vertical component` ограничивает почти горизонтальные траектории, чтобы мяч не зацикливался. `maximum correction threshold` не используется: у него нет однозначной роли в этих правилах.
+- `BallConfig` хранится в `Assets/Content/Data/Ball`: начальные `speed = 8` units/s, угол запуска `15–45°` от вертикали вверх симметрично влево и вправо, `minimum vertical component = 0.5` как минимальное `|y|` нормализованного направления.
 
 ## Gate 2
 

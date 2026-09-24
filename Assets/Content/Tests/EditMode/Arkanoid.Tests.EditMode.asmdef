@@ -2,7 +2,8 @@
     "name": "Arkanoid.Tests.EditMode",
     "rootNamespace": "Arkanoid.Tests.EditMode",
     "references": [
-        "GUID:c2e514f7186244d194f7f415be1c6089"
+        "GUID:c2e514f7186244d194f7f415be1c6089",
+        "GUID:661f5e002149453cb2ad8a33335e623a"
     ],
     "includePlatforms": [
         "Editor"

@@ -29,32 +29,10 @@ namespace Arkanoid.Paddle
         private void FixedUpdate()
         {
             var bounds = _playfieldCamera.WorldBounds;
-            var halfWidth = _config.Width * 0.5f;
-            var minX = bounds.xMin + halfWidth;
-            var maxX = bounds.xMax - halfWidth;
             var position = _body.position;
-
-            if (minX > maxX)
-            {
-                minX = bounds.center.x;
-                maxX = minX;
-            }
-
             var move = _playerInput.Move;
-            float nextX;
-
-            if (move.TargetWorldX.HasValue)
-            {
-                var targetX = Mathf.Clamp(move.TargetWorldX.Value, minX, maxX);
-                nextX = Mathf.MoveTowards(position.x, targetX, _config.Speed * Time.fixedDeltaTime);
-            }
-            else
-            {
-                var direction = Mathf.Clamp(move.Direction, -1f, 1f);
-                nextX = position.x + direction * _config.Speed * Time.fixedDeltaTime;
-            }
-
-            nextX = Mathf.Clamp(nextX, minX, maxX);
+            var nextX = PaddlePositionCalculator.CalculateNextX(
+                position.x, move, _config.Speed, Time.fixedDeltaTime, _config.Width, bounds);
 
             if (!Mathf.Approximately(nextX, position.x))
             {

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: PaddleConfig
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Paddle.PaddleConfig
   _speed: 8
-  _width: 2.17424
+  _width: 2

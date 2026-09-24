@@ -16,3 +16,4 @@ MonoBehaviour:
   _minimumLaunchAngleDegrees: 15
   _maximumLaunchAngleDegrees: 45
   _minimumVerticalComponent: 0.5
+  _minimumHorizontalComponent: 0.2

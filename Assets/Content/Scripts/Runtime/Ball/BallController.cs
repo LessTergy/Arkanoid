@@ -68,11 +68,52 @@ namespace Arkanoid.Ball
             var velocity = _body.linearVelocity;
             if (velocity.sqrMagnitude > MinimumVelocitySqrMagnitude)
             {
-                _lastFlyingDirection = velocity.normalized;
+                _lastFlyingDirection = BallBounceCalculator.LimitDirection(
+                    velocity, _lastFlyingDirection,
+                    _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
             }
 
             _body.linearVelocity = _lastFlyingDirection * _config.Speed;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private void OnGUI()
+        {
+            var velocity = _body.linearVelocity;
+            var direction = velocity.normalized;
+            var safeArea = Screen.safeArea;
+            var fontSize = Mathf.Max(14, Mathf.RoundToInt(safeArea.width / 50f));
+            var style = new GUIStyle(GUI.skin.box)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                fontSize = fontSize
+            };
+            var text = $"Ball: {State}\nDirection: ({direction.x:F2}, {direction.y:F2})\nSpeed: {velocity.magnitude:F2} units/s";
+            var bounds = new Rect(
+                safeArea.xMin + 12f,
+                Screen.height - safeArea.yMax + 12f,
+                Mathf.Min(safeArea.width - 24f, fontSize * 27f),
+                fontSize * 4.4f);
+            GUI.Box(bounds, text, style);
+        }
+#endif
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying || State != BallState.Flying)
+            {
+                return;
+            }
+
+            var direction = _body.linearVelocity.normalized;
+            var start = transform.position;
+            var end = start + (Vector3)(direction * 2f);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(start, end);
+            Gizmos.DrawSphere(end, 0.08f);
+        }
+#endif
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
@@ -89,8 +130,10 @@ namespace Arkanoid.Ball
             var direction = BallBounceCalculator.CalculatePaddleBounceDirection(
                 contactX, paddleCenterX, _paddleConfig.Width, _config.MinimumVerticalComponent);
 
-            _lastFlyingDirection = direction;
-            _body.linearVelocity = direction * _config.Speed;
+            _lastFlyingDirection = BallBounceCalculator.LimitDirection(
+                direction, _lastFlyingDirection,
+                _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
+            _body.linearVelocity = _lastFlyingDirection * _config.Speed;
         }
 
         public bool TryEnterFlying()
@@ -103,15 +146,15 @@ namespace Arkanoid.Ball
             HoldAbovePaddle();
             var minimumAngle = Mathf.Min(_config.MinimumLaunchAngleDegrees, _config.MaximumLaunchAngleDegrees);
             var maximumAngle = Mathf.Max(_config.MinimumLaunchAngleDegrees, _config.MaximumLaunchAngleDegrees);
-            var angle = Random.Range(minimumAngle, maximumAngle) * Mathf.Deg2Rad;
+            var angle = Random.Range(minimumAngle, maximumAngle);
             var horizontalSign = Random.value < 0.5f ? -1f : 1f;
-            var direction = new Vector2(horizontalSign * Mathf.Sin(angle), Mathf.Cos(angle)).normalized;
-
-            _lastFlyingDirection = direction;
+            _lastFlyingDirection = BallBounceCalculator.CalculateLaunchDirection(
+                angle, horizontalSign,
+                _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
             var launchPosition = transform.position;
             _body.position = new Vector2(launchPosition.x, launchPosition.y);
             _body.simulated = true;
-            _body.linearVelocity = direction * _config.Speed;
+            _body.linearVelocity = _lastFlyingDirection * _config.Speed;
             State = BallState.Flying;
             return true;
         }

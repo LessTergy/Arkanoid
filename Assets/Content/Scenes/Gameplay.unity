@@ -418,7 +418,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1652220875183762961, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
       propertyPath: m_Size.y
-      value: 3
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1652220875183762961, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6209340918273647597, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -426,7 +430,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6209340918273647597, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -11.12
+      value: -14.65
       objectReference: {fileID: 0}
     - target: {fileID: 6209340918273647597, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -463,6 +467,10 @@ PrefabInstance:
     - target: {fileID: 6907517242992177895, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
       propertyPath: m_Name
       value: DeathZone
+      objectReference: {fileID: 0}
+    - target: {fileID: 6907517242992177895, guid: a53683fdea1ee63499d9f8c532546a7d, type: 3}
+      propertyPath: m_Layer
+      value: 13
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

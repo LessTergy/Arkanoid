@@ -1,3 +1,4 @@
+using Arkanoid.Ball;
 using Arkanoid.Composition;
 using Arkanoid.Input;
 using Arkanoid.Paddle;
@@ -13,6 +14,8 @@ namespace Arkanoid
         [SerializeField] private InputSystemPlayerInput _playerInput;
         [SerializeField] private PaddleMovement _paddleMovement;
         [SerializeField] private PaddleConfig _paddleConfig;
+        [SerializeField] private BallController _ballController;
+        [SerializeField] private BallConfig _ballConfig;
         [SerializeField] private PlayfieldCamera _playfieldCamera;
 
         protected override void Configure(IContainerBuilder builder)
@@ -20,6 +23,8 @@ namespace Arkanoid
             builder.RegisterComponent(_playerInput).As<IPlayerInput>();
             builder.RegisterComponent(_paddleMovement);
             builder.RegisterInstance(_paddleConfig);
+            builder.RegisterComponent(_ballController);
+            builder.RegisterInstance(_ballConfig);
             builder.RegisterComponent(_playfieldCamera);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)
                 .WithParameter("scopeName", nameof(GameplayLifetimeScope));

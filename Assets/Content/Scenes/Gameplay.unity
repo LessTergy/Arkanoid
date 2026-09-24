@@ -119,6 +119,74 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &93986184
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6380068596538686897, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_Name
+      value: Ball
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -6.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669106569912658732, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+--- !u!114 &93986185 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9076001356731021134, guid: 00d8075bfbee11449bcb310c7266ecf0, type: 3}
+  m_PrefabInstance: {fileID: 93986184}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c67bb62d27444c9b430d9b64622bb44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Ball.BallController
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,6 +376,8 @@ MonoBehaviour:
   _playerInput: {fileID: 1830270794}
   _paddleMovement: {fileID: 2465481494322928951}
   _paddleConfig: {fileID: 11400000, guid: bc5547d3b98084c4da3086af898cd2f5, type: 2}
+  _ballController: {fileID: 93986185}
+  _ballConfig: {fileID: 11400000, guid: 82e68bddb30d4e3b8d3aad0250ed6132, type: 2}
   _playfieldCamera: {fileID: 330585548}
 --- !u!4 &1830270793
 Transform:
@@ -356,11 +426,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8669106569912658732, guid: 661d597c0e911884899edbd23c9d768b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.9299
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8669106569912658732, guid: 661d597c0e911884899edbd23c9d768b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.7494
+      value: -7.38
       objectReference: {fileID: 0}
     - target: {fileID: 8669106569912658732, guid: 661d597c0e911884899edbd23c9d768b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -408,7 +478,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fbf85cc3428030640b1946c03da49060, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Paddle.PaddleMovement
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -417,3 +487,4 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 1830270793}
   - {fileID: 2465481494322928950}
+  - {fileID: 93986184}

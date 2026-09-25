@@ -110,6 +110,21 @@ namespace Arkanoid.Ball
             _currentState.OnCollisionEnter2D(collision);
         }
 
+        public void Lose()
+        {
+            ChangeState(_lostState);
+        }
+
+        public void ResetToPaddle()
+        {
+            ChangeState(_attachedState);
+        }
+
+        public void PlaceAbovePaddle()
+        {
+            _view.HoldAbove(_paddleMovement.transform);
+        }
+
         private void ChangeState(BallStateBase nextState)
         {
             _currentState = nextState;

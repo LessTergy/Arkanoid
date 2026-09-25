@@ -31,9 +31,9 @@ namespace Arkanoid.Core.GameFlow
             return Handle(GameSessionSignal.StartPlaying);
         }
 
-        public void LoseLife()
+        public bool TryLoseLife()
         {
-            Handle(GameSessionSignal.LoseLife);
+            return Handle(GameSessionSignal.LoseLife);
         }
 
         public void ResumeAfterLifeLoss()

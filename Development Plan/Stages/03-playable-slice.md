@@ -10,8 +10,8 @@
 - [x] `P3.2` Реализовать простое правило: одно попадание уничтожает блок и порождает событие `BrickDestroyed`.
 - [x] `P3.3` Собрать небольшой тестовый layout вручную, без Addressables и генератора уровня.
 - [x] `P3.4` Реализовать `GameSession` с состояниями `Ready`, `Playing`, `LifeLost`, `LevelComplete`, `GameOver`.
-- [ ] `P3.5` Реализовать `LivesModel` с 3 жизнями и явными событиями изменения.
-- [ ] `P3.6` Связать DeathZone с потерей жизни: остановить текущий мяч, сбросить позицию платформы/мяча, перейти в `Ready` или `GameOver`.
+- [x] `P3.5` Реализовать `LivesModel` с 3 жизнями и явными событиями изменения.
+- [x] `P3.6` Связать DeathZone с потерей жизни: остановить текущий мяч, сбросить позицию платформы/мяча, перейти в `Ready` или `GameOver`.
 - [ ] `P3.7` Реализовать подсчёт оставшихся разрушаемых блоков и переход в `LevelComplete` при нуле.
 - [ ] `P3.8` Добавить минимальный HUD: lives, score placeholder, текст состояния и кнопка restart.
 - [ ] `P3.9` Реализовать pause, блокирующую gameplay input и physics simulation выбранным единообразным способом.
@@ -20,7 +20,9 @@
 
 `Brick.prefab` хранится в `Assets/Content/Prefabs/Gameplay`. `BrickIdentity.TypeId` имеет тип `BrickTypeId` (пока значение `Basic`) и одинаков у всех экземпляров prefab. Уничтожение блока и событие `BrickDestroyed` относятся к `P3.2`.
 
-`GameSession` начинается в `Ready`. Допустимые переходы: `Ready → Playing`, `Playing → LifeLost/LevelComplete`, `LifeLost → Ready/GameOver`, `LevelComplete/GameOver → Ready` через restart. Запуск мяча разрешён только из `Ready` и переводит сессию в `Playing`. DeathZone и блоки подключаются к переходам в последующих задачах этапа.
+`GameSession` начинается в `Ready`. Допустимые переходы: `Ready → Playing`, `Playing → LifeLost/LevelComplete`, `LifeLost → Ready/GameOver`, `LevelComplete/GameOver → Ready` через restart. Запуск мяча разрешён только из `Ready` и переводит сессию в `Playing`. Подсчёт блоков подключается в P3.7.
+
+`LivesModel` начинает с 3 жизнями и публикует `LivesChanged` при потере жизни или сбросе. Для проверки P3.6 добавь `DeathZone` на существующий объект нижнего trigger и укажи этот компонент в поле `Death Zone` на `GameplayLifetimeScope`. Первые два попадания переводят сессию через `LifeLost` в `Ready`; третье — через `LifeLost` в `GameOver`. Мяч останавливается, а платформа и мяч возвращаются к стартовым позициям после каждого попадания.
 
 ## Gate 3 — первый playable milestone
 

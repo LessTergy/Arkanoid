@@ -9,6 +9,7 @@ namespace Arkanoid.Paddle
     public sealed class PaddleMovement : MonoBehaviour
     {
         private Rigidbody2D _body;
+        private Vector2 _initialPosition;
         private IPlayerInput _playerInput;
         private PaddleConfig _config;
         private PlayfieldCamera _playfieldCamera;
@@ -24,6 +25,12 @@ namespace Arkanoid.Paddle
         private void Awake()
         {
             _body = GetComponent<Rigidbody2D>();
+            _initialPosition = _body.position;
+        }
+
+        public void ResetPosition()
+        {
+            _body.position = _initialPosition;
         }
 
         private void FixedUpdate()

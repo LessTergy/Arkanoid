@@ -1,3 +1,4 @@
+using Arkanoid.Core.GameFlow;
 using Arkanoid.Input;
 using Arkanoid.Paddle;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace Arkanoid.Ball
         [SerializeField, Min(0f)] private float _attachedOffsetY = 0.5f;
 
         private IPlayerInput _playerInput;
+        private GameSession _gameSession;
         private PaddleMovement _paddleMovement;
         private PaddleConfig _paddleConfig;
         private BallConfig _config;
@@ -25,11 +27,13 @@ namespace Arkanoid.Ball
         [Inject]
         public void Construct(
             IPlayerInput playerInput,
+            GameSession gameSession,
             PaddleMovement paddleMovement,
             PaddleConfig paddleConfig,
             BallConfig config)
         {
             _playerInput = playerInput;
+            _gameSession = gameSession;
             _paddleMovement = paddleMovement;
             _paddleConfig = paddleConfig;
             _config = config;
@@ -43,7 +47,7 @@ namespace Arkanoid.Ball
         private void Start()
         {
             _flyingState = new BallFlyingState(_view, _paddleMovement, _paddleConfig, _config);
-            _attachedState = new BallAttachedState(_view, _playerInput, _paddleMovement, _flyingState);
+            _attachedState = new BallAttachedState(_view, _playerInput, _gameSession, _paddleMovement, _flyingState);
             _lostState = new BallLostState(_view);
             ChangeState(_attachedState);
         }
@@ -79,12 +83,12 @@ namespace Arkanoid.Ball
                 alignment = TextAnchor.MiddleLeft,
                 fontSize = fontSize
             };
-            var text = $"Ball: {State}\nDirection: ({direction.x:F2}, {direction.y:F2})\nSpeed: {velocity.magnitude:F2} units/s";
+            var text = $"Session: {_gameSession.State}\nBall: {State}\nDirection: ({direction.x:F2}, {direction.y:F2})\nSpeed: {velocity.magnitude:F2} units/s";
             var bounds = new Rect(
                 safeArea.xMin + 12f,
                 Screen.height - safeArea.yMax + 12f,
                 Mathf.Min(safeArea.width - 24f, fontSize * 27f),
-                fontSize * 4.4f);
+                fontSize * 5.4f);
             GUI.Box(bounds, text, style);
         }
 #endif

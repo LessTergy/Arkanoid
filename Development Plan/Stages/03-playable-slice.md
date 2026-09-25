@@ -7,9 +7,9 @@
 ## Задачи
 
 - [x] `P3.1` Создать prefab простого блока с collider, view и идентификатором.
-- [ ] `P3.2` Реализовать простое правило: одно попадание уничтожает блок и порождает событие `BrickDestroyed`.
-- [ ] `P3.3` Собрать небольшой тестовый layout вручную, без Addressables и генератора уровня.
-- [ ] `P3.4` Реализовать `GameSession` с состояниями `Ready`, `Playing`, `LifeLost`, `LevelComplete`, `GameOver`.
+- [x] `P3.2` Реализовать простое правило: одно попадание уничтожает блок и порождает событие `BrickDestroyed`.
+- [x] `P3.3` Собрать небольшой тестовый layout вручную, без Addressables и генератора уровня.
+- [x] `P3.4` Реализовать `GameSession` с состояниями `Ready`, `Playing`, `LifeLost`, `LevelComplete`, `GameOver`.
 - [ ] `P3.5` Реализовать `LivesModel` с 3 жизнями и явными событиями изменения.
 - [ ] `P3.6` Связать DeathZone с потерей жизни: остановить текущий мяч, сбросить позицию платформы/мяча, перейти в `Ready` или `GameOver`.
 - [ ] `P3.7` Реализовать подсчёт оставшихся разрушаемых блоков и переход в `LevelComplete` при нуле.
@@ -19,6 +19,8 @@
 - [ ] `P3.11` Добавить PlayMode smoke-test: запуск → уничтожение последнего блока → `LevelComplete`.
 
 `Brick.prefab` хранится в `Assets/Content/Prefabs/Gameplay`. `BrickIdentity.TypeId` имеет тип `BrickTypeId` (пока значение `Basic`) и одинаков у всех экземпляров prefab. Уничтожение блока и событие `BrickDestroyed` относятся к `P3.2`.
+
+`GameSession` начинается в `Ready`. Допустимые переходы: `Ready → Playing`, `Playing → LifeLost/LevelComplete`, `LifeLost → Ready/GameOver`, `LevelComplete/GameOver → Ready` через restart. Запуск мяча разрешён только из `Ready` и переводит сессию в `Playing`. DeathZone и блоки подключаются к переходам в последующих задачах этапа.
 
 ## Gate 3 — первый playable milestone
 

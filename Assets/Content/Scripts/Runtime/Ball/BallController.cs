@@ -8,18 +8,19 @@ namespace Arkanoid.Ball
     [RequireComponent(typeof(Rigidbody2D))]
     public sealed class BallController : MonoBehaviour
     {
-        private const float MinimumVelocitySqrMagnitude = 0.000001f;
-
         [SerializeField, Min(0f)] private float _attachedOffsetY = 0.5f;
 
-        private Rigidbody2D _body;
         private IPlayerInput _playerInput;
         private PaddleMovement _paddleMovement;
         private PaddleConfig _paddleConfig;
         private BallConfig _config;
-        private Vector2 _lastFlyingDirection;
+        private BallView _view;
+        private BallAttachedState _attachedState;
+        private BallFlyingState _flyingState;
+        private BallLostState _lostState;
+        private BallStateBase _currentState;
 
-        public BallState State { get; private set; } = BallState.Attached;
+        public BallState State => _currentState?.Id ?? BallState.Attached;
 
         [Inject]
         public void Construct(
@@ -36,50 +37,40 @@ namespace Arkanoid.Ball
 
         private void Awake()
         {
-            _body = GetComponent<Rigidbody2D>();
-            _body.bodyType = RigidbodyType2D.Dynamic;
-            _body.gravityScale = 0f;
-            _body.simulated = false;
+            _view = new BallView(GetComponent<Rigidbody2D>(), transform, () => _attachedOffsetY);
+        }
+
+        private void Start()
+        {
+            _flyingState = new BallFlyingState(_view, _paddleMovement, _paddleConfig, _config);
+            _attachedState = new BallAttachedState(_view, _playerInput, _paddleMovement, _flyingState);
+            _lostState = new BallLostState(_view);
+            ChangeState(_attachedState);
         }
 
         private void Update()
         {
-            if (State == BallState.Attached && _playerInput.LaunchPressedThisFrame)
+            var nextState = _currentState.Update();
+            if (nextState != null)
             {
-                TryEnterFlying();
+                ChangeState(nextState);
             }
         }
 
         private void LateUpdate()
         {
-            if (State == BallState.Attached)
-            {
-                HoldAbovePaddle();
-            }
+            _currentState.LateUpdate();
         }
 
         private void FixedUpdate()
         {
-            if (State != BallState.Flying)
-            {
-                return;
-            }
-
-            var velocity = _body.linearVelocity;
-            if (velocity.sqrMagnitude > MinimumVelocitySqrMagnitude)
-            {
-                _lastFlyingDirection = BallBounceCalculator.LimitDirection(
-                    velocity, _lastFlyingDirection,
-                    _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
-            }
-
-            _body.linearVelocity = _lastFlyingDirection * _config.Speed;
+            _currentState.FixedUpdate();
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private void OnGUI()
         {
-            var velocity = _body.linearVelocity;
+            var velocity = _view.Body.linearVelocity;
             var direction = velocity.normalized;
             var safeArea = Screen.safeArea;
             var fontSize = Mathf.Max(14, Mathf.RoundToInt(safeArea.width / 50f));
@@ -101,90 +92,24 @@ namespace Arkanoid.Ball
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
-            if (!Application.isPlaying || State != BallState.Flying)
+            if (!Application.isPlaying)
             {
                 return;
             }
 
-            var direction = _body.linearVelocity.normalized;
-            var start = transform.position;
-            var end = start + (Vector3)(direction * 2f);
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(start, end);
-            Gizmos.DrawSphere(end, 0.08f);
+            _currentState?.OnDrawGizmos();
         }
 #endif
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (State != BallState.Flying
-                || collision.gameObject != _paddleMovement.gameObject
-                || _body.position.y <= _paddleMovement.transform.position.y)
-            {
-                return;
-            }
-
-            var contactX = collision.GetContact(0).point.x;
-            var paddleCenterX = _paddleMovement.transform.position.x;
-            // Override the solver's reflection so the hit position controls the bounce direction.
-            var direction = BallBounceCalculator.CalculatePaddleBounceDirection(
-                contactX, paddleCenterX, _paddleConfig.Width, _config.MinimumVerticalComponent);
-
-            _lastFlyingDirection = BallBounceCalculator.LimitDirection(
-                direction, _lastFlyingDirection,
-                _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
-            _body.linearVelocity = _lastFlyingDirection * _config.Speed;
+            _currentState.OnCollisionEnter2D(collision);
         }
 
-        public bool TryEnterFlying()
+        private void ChangeState(BallStateBase nextState)
         {
-            if (State != BallState.Attached)
-            {
-                return false;
-            }
-
-            HoldAbovePaddle();
-            var minimumAngle = Mathf.Min(_config.MinimumLaunchAngleDegrees, _config.MaximumLaunchAngleDegrees);
-            var maximumAngle = Mathf.Max(_config.MinimumLaunchAngleDegrees, _config.MaximumLaunchAngleDegrees);
-            var angle = Random.Range(minimumAngle, maximumAngle);
-            var horizontalSign = Random.value < 0.5f ? -1f : 1f;
-            _lastFlyingDirection = BallBounceCalculator.CalculateLaunchDirection(
-                angle, horizontalSign,
-                _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
-            var launchPosition = transform.position;
-            _body.position = new Vector2(launchPosition.x, launchPosition.y);
-            _body.simulated = true;
-            _body.linearVelocity = _lastFlyingDirection * _config.Speed;
-            State = BallState.Flying;
-            return true;
-        }
-
-        public bool TryEnterLost()
-        {
-            if (State != BallState.Flying)
-            {
-                return false;
-            }
-
-            _body.linearVelocity = Vector2.zero;
-            _body.simulated = false;
-            State = BallState.Lost;
-            return true;
-        }
-
-        public void EnterAttached()
-        {
-            _body.linearVelocity = Vector2.zero;
-            _body.simulated = false;
-            State = BallState.Attached;
-            HoldAbovePaddle();
-        }
-
-        private void HoldAbovePaddle()
-        {
-            var paddlePosition = _paddleMovement.transform.position;
-            var position = transform.position;
-            transform.position = new Vector3(paddlePosition.x, paddlePosition.y + _attachedOffsetY, position.z);
+            _currentState = nextState;
+            _currentState.Enter();
         }
     }
 }

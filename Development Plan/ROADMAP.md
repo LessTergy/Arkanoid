@@ -46,6 +46,6 @@ docs: add architecture and verification guide
 - level selection и локальный progress save;
 - accessibility options: reduced motion, volume controls, high-contrast palette;
 - WebGL build;
-- editor tooling для проверки LevelDefinition.
+- editor tooling для проверки prefab-вариантов уровня.
 
 Каждое расширение начинается с отдельного мини-ТЗ, acceptance criteria и оценки влияния на существующие правила.

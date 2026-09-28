@@ -5,6 +5,7 @@ namespace Arkanoid.Ball
         None = 0,
         Attached = 1,
         Flying = 2,
-        Lost = 3
+        Lost = 3,
+        Stopped = 4
     }
 }

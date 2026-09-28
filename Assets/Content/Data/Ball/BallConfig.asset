@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 119614608dfc4864a20ac98ee7b6dd20, type: 3}
   m_Name: BallConfig
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Ball.BallConfig
-  _speed: 8
+  _speed: 12
   _minimumLaunchAngleDegrees: 15
   _maximumLaunchAngleDegrees: 45
   _minimumVerticalComponent: 0.5

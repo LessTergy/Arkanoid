@@ -20,6 +20,7 @@ namespace Arkanoid.Ball
         private BallAttachedState _attachedState;
         private BallFlyingState _flyingState;
         private BallLostState _lostState;
+        private BallStoppedState _stoppedState;
         private BallStateBase _currentState;
 
         public BallState State => _currentState?.Id ?? BallState.Attached;
@@ -49,6 +50,7 @@ namespace Arkanoid.Ball
             _flyingState = new BallFlyingState(_view, _paddleMovement, _paddleConfig, _config);
             _attachedState = new BallAttachedState(_view, _playerInput, _gameSession, _paddleMovement, _flyingState);
             _lostState = new BallLostState(_view);
+            _stoppedState = new BallStoppedState(_view);
             ChangeState(_attachedState);
         }
 
@@ -123,6 +125,11 @@ namespace Arkanoid.Ball
         public void PlaceAbovePaddle()
         {
             _view.HoldAbove(_paddleMovement.transform);
+        }
+
+        public void StopMovement()
+        {
+            ChangeState(_stoppedState);
         }
 
         private void ChangeState(BallStateBase nextState)

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8815f4c7d047aaf4fa4ca2eab3fdd8cf, type: 3}
   m_Name: PaddleConfig
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Paddle.PaddleConfig
-  _speed: 8
+  _speed: 12
   _width: 2

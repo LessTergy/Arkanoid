@@ -20,7 +20,9 @@
 
 `Brick.prefab` хранится в `Assets/Content/Prefabs/Gameplay`. `BrickIdentity.TypeId` имеет тип `BrickTypeId` (пока значение `Basic`) и одинаков у всех экземпляров prefab. Уничтожение блока и событие `BrickDestroyed` относятся к `P3.2`.
 
-`GameSession` начинается в `Ready`. Допустимые переходы: `Ready → Playing`, `Playing → LifeLost/LevelComplete`, `LifeLost → Ready/GameOver`, `LevelComplete/GameOver → Ready` через restart. Запуск мяча разрешён только из `Ready` и переводит сессию в `Playing`. Подсчёт блоков подключается в P3.7.
+`GameSession` начинается в `Ready`. Допустимые переходы: `Ready → Playing`, `Playing → LifeLost/LevelComplete`, `LifeLost → Ready/GameOver`, `LevelComplete/GameOver → Ready` через restart. Запуск мяча разрешён только из `Ready` и переводит сессию в `Playing`.
+
+Для P3.7 каждый вариант уровня собирается как prefab с `LevelView` на корне и активными дочерними `BrickView`. Экземпляр prefab размещается в `Gameplay`, а его `LevelView` назначается в `GameplayLifetimeScope`. `LevelView` считает активные разрушаемые блоки, подписывается на `BrickDestroyed` и сообщает через `AllBricksDestroyed`, когда уничтожен последний блок. `LevelCompletionHandler` останавливает мяч и переводит сессию в `LevelComplete`. Пустой уровень считается ошибкой настройки.
 
 `LivesModel` начинает с 3 жизнями и публикует `LivesChanged` при потере жизни или сбросе. Для проверки P3.6 добавь `DeathZone` на существующий объект нижнего trigger и укажи этот компонент в поле `Death Zone` на `GameplayLifetimeScope`. Первые два попадания переводят сессию через `LifeLost` в `Ready`; третье — через `LifeLost` в `GameOver`. Мяч останавливается, а платформа и мяч возвращаются к стартовым позициям после каждого попадания.
 

@@ -15,7 +15,7 @@ namespace Arkanoid.Bricks
 
         public BrickTypeId TypeId => _typeId;
 
-        public event Action<BrickView> BrickDestroyed;
+        public event Action<BrickView> Destroyed;
 
         private bool _destroyed;
 
@@ -27,7 +27,7 @@ namespace Arkanoid.Bricks
             }
 
             _destroyed = true;
-            BrickDestroyed?.Invoke(this);
+            Destroyed?.Invoke(this);
             Destroy(gameObject);
         }
     }

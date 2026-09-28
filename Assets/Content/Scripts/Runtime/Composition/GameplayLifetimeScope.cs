@@ -3,6 +3,7 @@ using Arkanoid.Composition;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.GameFlow;
 using Arkanoid.Input;
+using Arkanoid.Levels;
 using Arkanoid.Paddle;
 using Arkanoid.Playfield;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Arkanoid
         [SerializeField] private BallConfig _ballConfig;
         [SerializeField] private PlayfieldCamera _playfieldCamera;
         [SerializeField] private DeathZone _deathZone;
+        [SerializeField] private LevelView _levelView;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -30,11 +32,14 @@ namespace Arkanoid
             builder.RegisterInstance(_ballConfig);
             builder.RegisterComponent(_playfieldCamera);
             builder.RegisterComponent(_deathZone);
+            builder.RegisterComponent(_levelView);
             builder.Register<GameSession>(Lifetime.Scoped);
             builder.Register<LivesModel>(Lifetime.Scoped);
+            builder.Register<LevelFinishedHandler>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)
                 .WithParameter("scopeName", nameof(GameplayLifetimeScope));
             builder.RegisterBuildCallback(resolver => resolver.Resolve<ScopeLifetimeProbe>());
+            builder.RegisterBuildCallback(resolver => resolver.Resolve<LevelFinishedHandler>());
         }
     }
 }

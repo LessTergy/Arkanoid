@@ -2,15 +2,15 @@
 
 [Назад: этап 8](08-bonus-composite.md) · [К индексу](../README.md) · [Далее: этап 10](10-game-flow-ui.md)
 
-**Результат:** три уровня загружаются локально через Addressables, сменяются без утечек и не требуют ручного размещения блоков в сцене.
+**Результат:** три варианта уровня, собранные как prefabs с `LevelView`, загружаются локально через Addressables, сменяются без утечек и не требуют ручного размещения блоков в сцене.
 
 ## Задачи
 
-- [ ] `P9.1` Создать `LevelDefinition` ScriptableObject: id, display name, grid/placements, brick definition ids, bonus overrides, optional theme.
-- [ ] `P9.2` Выбрать один формат layout и не смешивать подходы. Рекомендуется компактная grid-модель с пустыми cells и ссылками на `BrickDefinition`.
-- [ ] `P9.3` Реализовать обычный `LevelBuilder`, который получает уже загруженный definition и создаёт blocks через factory.
-- [ ] `P9.4` Перевести тестовый ручной layout этапа 3 в `LevelDefinition`; сравнить игровой результат до удаления ручной версии.
-- [ ] `P9.5` Создать локальные Addressables groups: `LevelData`, `LevelPrefabs`, `SharedGameplay` с осмысленными labels/addresses.
+- [ ] `P9.1` Определить идентификаторы и порядок prefab-вариантов уровня для прохождения.
+- [ ] `P9.2` Подготовить три prefab-варианта с `LevelView` и дочерними блоками, не смешивая их с grid layout.
+- [ ] `P9.3` Реализовать создание и уничтожение загруженного prefab уровня через фабрику на границе DI.
+- [ ] `P9.4` После проверки загрузки убрать сценовый экземпляр тестового уровня этапа 3.
+- [ ] `P9.5` Создать локальные Addressables groups: `LevelPrefabs`, `SharedGameplay` с осмысленными labels/addresses.
 - [ ] `P9.6` Определить `ILevelLoader` и `AddressablesLevelLoader`.
 - [ ] `P9.7` Возвращать из loader явный lease/loaded-level object, владеющий operation handles. Не отдавать наружу «голый» asset без владельца.
 - [ ] `P9.8` При создании prefab из загруженного asset сохранять handle до уничтожения всех instances; не освобождать asset сразу после `Instantiate`.

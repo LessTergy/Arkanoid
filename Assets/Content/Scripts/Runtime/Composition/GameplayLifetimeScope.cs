@@ -6,6 +6,7 @@ using Arkanoid.Input;
 using Arkanoid.Levels;
 using Arkanoid.Paddle;
 using Arkanoid.Playfield;
+using Arkanoid.UI;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -22,6 +23,7 @@ namespace Arkanoid
         [SerializeField] private PlayfieldCamera _playfieldCamera;
         [SerializeField] private DeathZone _deathZone;
         [SerializeField] private LevelView _levelView;
+        [SerializeField] private GameplayHudView _hudView;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -33,13 +35,16 @@ namespace Arkanoid
             builder.RegisterComponent(_playfieldCamera);
             builder.RegisterComponent(_deathZone);
             builder.RegisterComponent(_levelView);
+            builder.RegisterComponent(_hudView);
             builder.Register<GameSession>(Lifetime.Scoped);
             builder.Register<LivesModel>(Lifetime.Scoped);
             builder.Register<LevelFinishedHandler>(Lifetime.Scoped);
+            builder.Register<GameplayHudPresenter>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)
                 .WithParameter("scopeName", nameof(GameplayLifetimeScope));
             builder.RegisterBuildCallback(resolver => resolver.Resolve<ScopeLifetimeProbe>());
             builder.RegisterBuildCallback(resolver => resolver.Resolve<LevelFinishedHandler>());
+            builder.RegisterBuildCallback(resolver => resolver.Resolve<GameplayHudPresenter>());
         }
     }
 }

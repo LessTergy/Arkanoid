@@ -170,3 +170,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Ball.BallController
   _attachedOffsetY: 0.5
+  _showDebugOverlay: 0

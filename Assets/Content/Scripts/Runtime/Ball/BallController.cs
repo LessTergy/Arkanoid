@@ -10,6 +10,9 @@ namespace Arkanoid.Ball
     public sealed class BallController : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float _attachedOffsetY = 0.5f;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        [SerializeField] private bool _showDebugOverlay = true;
+#endif
 
         private IPlayerInput _playerInput;
         private GameSession _gameSession;
@@ -76,21 +79,27 @@ namespace Arkanoid.Ball
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private void OnGUI()
         {
+            if (!_showDebugOverlay)
+            {
+                return;
+            }
+
             var velocity = _view.Body.linearVelocity;
-            var direction = velocity.normalized;
             var safeArea = Screen.safeArea;
-            var fontSize = Mathf.Max(14, Mathf.RoundToInt(safeArea.width / 50f));
+            var fontSize = Mathf.Clamp(Mathf.RoundToInt(safeArea.width / 100f), 14, 24);
             var style = new GUIStyle(GUI.skin.box)
             {
                 alignment = TextAnchor.MiddleLeft,
                 fontSize = fontSize
             };
-            var text = $"Session: {_gameSession.State}\nBall: {State}\nDirection: ({direction.x:F2}, {direction.y:F2})\nSpeed: {velocity.magnitude:F2} units/s";
+            var text = $"Session: {_gameSession.State}\nBall: {State}\nSpeed: {velocity.magnitude:F2} units/s";
+            var width = Mathf.Min(safeArea.width - 24f, fontSize * 19f);
+            var height = fontSize * 4.2f;
             var bounds = new Rect(
-                safeArea.xMin + 12f,
-                Screen.height - safeArea.yMax + 12f,
-                Mathf.Min(safeArea.width - 24f, fontSize * 27f),
-                fontSize * 5.4f);
+                safeArea.xMax - 12f - width,
+                Screen.height - safeArea.yMin - 12f - height,
+                width,
+                height);
             GUI.Box(bounds, text, style);
         }
 #endif

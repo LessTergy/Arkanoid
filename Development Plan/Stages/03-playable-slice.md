@@ -12,7 +12,7 @@
 - [x] `P3.4` Реализовать `GameSession` с состояниями `Ready`, `Playing`, `LifeLost`, `LevelComplete`, `GameOver`.
 - [x] `P3.5` Реализовать `LivesModel` с 3 жизнями и явными событиями изменения.
 - [x] `P3.6` Связать DeathZone с потерей жизни: остановить текущий мяч, сбросить позицию платформы/мяча, перейти в `Ready` или `GameOver`.
-- [ ] `P3.7` Реализовать подсчёт оставшихся разрушаемых блоков и переход в `LevelComplete` при нуле.
+- [x] `P3.7` Реализовать подсчёт оставшихся разрушаемых блоков и переход в `LevelComplete` при нуле.
 - [ ] `P3.8` Добавить минимальный HUD: lives, score placeholder, текст состояния и кнопка restart.
 - [ ] `P3.9` Реализовать pause, блокирующую gameplay input и physics simulation выбранным единообразным способом.
 - [ ] `P3.10` Добавить EditMode-тесты переходов `GameSession` и `LivesModel`.
@@ -22,7 +22,9 @@
 
 `GameSession` начинается в `Ready`. Допустимые переходы: `Ready → Playing`, `Playing → LifeLost/LevelComplete`, `LifeLost → Ready/GameOver`, `LevelComplete/GameOver → Ready` через restart. Запуск мяча разрешён только из `Ready` и переводит сессию в `Playing`.
 
-Для P3.7 каждый вариант уровня собирается как prefab с `LevelView` на корне и активными дочерними `BrickView`. Экземпляр prefab размещается в `Gameplay`, а его `LevelView` назначается в `GameplayLifetimeScope`. `LevelView` считает активные разрушаемые блоки, подписывается на `BrickDestroyed` и сообщает через `AllBricksDestroyed`, когда уничтожен последний блок. `LevelCompletionHandler` останавливает мяч и переводит сессию в `LevelComplete`. Пустой уровень считается ошибкой настройки.
+Для P3.7 каждый вариант уровня собирается как prefab с `LevelView` на корне и активными дочерними `BrickView`. Экземпляр prefab размещается в `Gameplay`, а его `LevelView` назначается в `GameplayLifetimeScope`. `LevelView` считает активные разрушаемые блоки, подписывается на `Destroyed` и сообщает через `Finished`, когда уничтожен последний блок. `LevelFinishedHandler` останавливает мяч и переводит сессию в `LevelComplete`. Пустой уровень считается ошибкой настройки.
+
+Для P3.8 prefab HUD создаётся на Canvas с компонентом `GameplayHudView`, тремя текстами TextMeshPro (`Lives`, `Score`, `State`) и кнопками `Restart` и `Pause`. Экземпляр HUD размещается в `Gameplay` и назначается в `GameplayLifetimeScope`. `GameplayHudPresenter` отображает текущие жизни и состояние через события моделей; `Score: 0` остаётся заглушкой до этапа подсчёта очков. `Restart` перезагружает сцену `Gameplay`, восстанавливая блоки, жизни и начальное состояние. `Pause` отображается выключенной до P3.9.
 
 `LivesModel` начинает с 3 жизнями и публикует `LivesChanged` при потере жизни или сбросе. Для проверки P3.6 добавь `DeathZone` на существующий объект нижнего trigger и укажи этот компонент в поле `Death Zone` на `GameplayLifetimeScope`. Первые два попадания переводят сессию через `LifeLost` в `Ready`; третье — через `LifeLost` в `GameOver`. Мяч останавливается, а платформа и мяч возвращаются к стартовым позициям после каждого попадания.
 

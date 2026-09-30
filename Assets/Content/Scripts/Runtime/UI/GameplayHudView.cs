@@ -11,6 +11,7 @@ namespace Arkanoid.UI
         [SerializeField] private TMP_Text _scoreText;
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _pauseButton;
+        [SerializeField] private TMP_Text _pauseButtonText;
 
         public event Action RestartRequested;
         public event Action PauseRequested;
@@ -37,14 +38,19 @@ namespace Arkanoid.UI
             _scoreText.text = value;
         }
 
-        public void SetRestartEnabled(bool enabled)
+        public void SetRestartEnabled(bool value)
         {
-            _restartButton.interactable = enabled;
+            _restartButton.interactable = value;
         }
 
-        public void SetPauseEnabled(bool enabled)
+        public void SetPauseEnabled(bool value)
         {
-            _pauseButton.interactable = enabled;
+            _pauseButton.interactable = value;
+        }
+
+        public void SetPauseText(string value)
+        {
+            _pauseButtonText.text = value;
         }
 
         private void OnRestartClicked()

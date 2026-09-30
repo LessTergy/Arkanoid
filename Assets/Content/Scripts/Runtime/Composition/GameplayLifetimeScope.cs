@@ -27,7 +27,7 @@ namespace Arkanoid
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterComponent(_playerInput).As<IPlayerInput>();
+            builder.RegisterComponent(_playerInput).AsSelf().As<IPlayerInput>();
             builder.RegisterComponent(_paddleMovement);
             builder.RegisterInstance(_paddleConfig);
             builder.RegisterComponent(_ballController);
@@ -38,6 +38,7 @@ namespace Arkanoid
             builder.RegisterComponent(_hudView);
             builder.Register<GameSession>(Lifetime.Scoped);
             builder.Register<LivesModel>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<GameplayPauseController>(Lifetime.Scoped).AsSelf();
             builder.Register<LevelFinishedHandler>(Lifetime.Scoped);
             builder.Register<GameplayHudPresenter>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)

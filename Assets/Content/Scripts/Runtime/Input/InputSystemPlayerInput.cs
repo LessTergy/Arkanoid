@@ -12,10 +12,17 @@ namespace Arkanoid.Input
         [SerializeField] private InputActionReference _pause;
         [SerializeField] private Camera _gameplayCamera;
 
+        private bool _gameplayInputEnabled = true;
+
         public PlayerMoveIntent Move
         {
             get
             {
+                if (!_gameplayInputEnabled)
+                {
+                    return new PlayerMoveIntent(0f, null);
+                }
+
                 if (_touchPress.action.IsPressed())
                 {
                     var position = _touchPosition.action.ReadValue<Vector2>();
@@ -27,8 +34,13 @@ namespace Arkanoid.Input
             }
         }
 
-        public bool LaunchPressedThisFrame => _launch.action.WasPressedThisFrame();
+        public bool LaunchPressedThisFrame => _gameplayInputEnabled && _launch.action.WasPressedThisFrame();
         public bool PausePressedThisFrame => _pause.action.WasPressedThisFrame();
+
+        public void SetGameplayInputEnabled(bool value)
+        {
+            _gameplayInputEnabled = value;
+        }
 
         private void OnEnable()
         {

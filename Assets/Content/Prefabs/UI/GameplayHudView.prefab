@@ -469,6 +469,7 @@ MonoBehaviour:
   _scoreText: {fileID: 4939393947858393890}
   _restartButton: {fileID: 241719336805024332}
   _pauseButton: {fileID: 7498376859818869230}
+  _pauseButtonText: {fileID: 8220254963058142339}
 --- !u!1 &3904050571046997693
 GameObject:
   m_ObjectHideFlags: 0

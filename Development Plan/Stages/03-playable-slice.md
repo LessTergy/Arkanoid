@@ -1,6 +1,6 @@
 # Этап 3. Простые блоки и первый вертикальный срез
 
-[Назад: этап 2](02-ball.md) · [К индексу](../README.md) · [Далее: этап 4](04-vcontainer.md)
+[Назад: этап 2](02-ball.md) · [К индексу](../README.md) · [Далее: рефакторинг перед этапом 4](03-refactoring.md)
 
 **Результат:** существует минимальная полностью играбельная партия с одним уровнем.
 
@@ -17,6 +17,8 @@
 - [x] `P3.9` Реализовать pause, блокирующую gameplay input и physics simulation выбранным единообразным способом.
 - [x] `P3.10` Добавить EditMode-тесты переходов `GameSession` и `LivesModel`.
 - [x] `P3.11` Добавить PlayMode smoke-test: запуск → уничтожение последнего блока → `LevelComplete`.
+
+Перед окончательной проверкой `Gate 3`: [линейный план рефакторинга](03-refactoring.md).
 
 `Brick.prefab` хранится в `Assets/Content/Prefabs/Gameplay`. `BrickIdentity.TypeId` имеет тип `BrickTypeId` (пока значение `Basic`) и одинаков у всех экземпляров prefab. Уничтожение блока и событие `BrickDestroyed` относятся к `P3.2`.
 

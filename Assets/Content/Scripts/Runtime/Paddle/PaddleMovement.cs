@@ -31,6 +31,8 @@ namespace Arkanoid.Paddle
         public void ResetPosition()
         {
             _body.position = _initialPosition;
+            var position = transform.position;
+            transform.position = new Vector3(_initialPosition.x, _initialPosition.y, position.z);
         }
 
         private void FixedUpdate()

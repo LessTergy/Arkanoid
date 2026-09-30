@@ -13,10 +13,10 @@
 - [x] `P3.5` Реализовать `LivesModel` с 3 жизнями и явными событиями изменения.
 - [x] `P3.6` Связать DeathZone с потерей жизни: остановить текущий мяч, сбросить позицию платформы/мяча, перейти в `Ready` или `GameOver`.
 - [x] `P3.7` Реализовать подсчёт оставшихся разрушаемых блоков и переход в `LevelComplete` при нуле.
-- [ ] `P3.8` Добавить минимальный HUD: lives, score placeholder, текст состояния и кнопка restart.
-- [ ] `P3.9` Реализовать pause, блокирующую gameplay input и physics simulation выбранным единообразным способом.
-- [ ] `P3.10` Добавить EditMode-тесты переходов `GameSession` и `LivesModel`.
-- [ ] `P3.11` Добавить PlayMode smoke-test: запуск → уничтожение последнего блока → `LevelComplete`.
+- [x] `P3.8` Добавить минимальный HUD: lives, score placeholder, текст состояния и кнопка restart.
+- [x] `P3.9` Реализовать pause, блокирующую gameplay input и physics simulation выбранным единообразным способом.
+- [x] `P3.10` Добавить EditMode-тесты переходов `GameSession` и `LivesModel`.
+- [x] `P3.11` Добавить PlayMode smoke-test: запуск → уничтожение последнего блока → `LevelComplete`.
 
 `Brick.prefab` хранится в `Assets/Content/Prefabs/Gameplay`. `BrickIdentity.TypeId` имеет тип `BrickTypeId` (пока значение `Basic`) и одинаков у всех экземпляров prefab. Уничтожение блока и событие `BrickDestroyed` относятся к `P3.2`.
 

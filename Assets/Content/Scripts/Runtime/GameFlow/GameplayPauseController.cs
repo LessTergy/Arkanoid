@@ -6,7 +6,7 @@ using VContainer.Unity;
 
 namespace Arkanoid.GameFlow
 {
-    internal sealed class GameplayPauseController : ITickable, IDisposable
+    internal sealed class GameplayPauseController : IStartable, ITickable, IDisposable
     {
         private readonly InputSystemPlayerInput _playerInput;
         private readonly GameSession _gameSession;
@@ -17,12 +17,16 @@ namespace Arkanoid.GameFlow
         {
             _playerInput = playerInput;
             _gameSession = gameSession;
-            _gameSession.StateChanged += OnGameSessionStateChanged;
         }
 
         public bool IsPaused { get; private set; }
 
         public event Action<bool> PauseChanged;
+
+        public void Start()
+        {
+            _gameSession.StateChanged += OnGameSessionStateChanged;
+        }
 
         public void Tick()
         {

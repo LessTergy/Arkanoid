@@ -1,10 +1,11 @@
 using System;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.GameFlow;
+using VContainer.Unity;
 
 namespace Arkanoid.UI
 {
-    internal sealed class GameplayHudPresenter : IDisposable
+    internal sealed class GameplayHudPresenter : IStartable, IDisposable
     {
         private readonly GameplayHudView _view;
         private readonly LivesModel _livesModel;
@@ -24,7 +25,10 @@ namespace Arkanoid.UI
             _gameSession = gameSession;
             _pauseController = pauseController;
             _sceneNavigator = sceneNavigator;
+        }
 
+        public void Start()
+        {
             _livesModel.LivesChanged += OnLivesChanged;
             _gameSession.StateChanged += OnGameSessionStateChanged;
             _pauseController.PauseChanged += OnPauseChanged;

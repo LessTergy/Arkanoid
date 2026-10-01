@@ -41,13 +41,11 @@ namespace Arkanoid
             builder.RegisterEntryPoint<GameplayPauseController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<LaunchHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LifeLossHandler>(Lifetime.Scoped);
-            builder.Register<LevelFinishedHandler>(Lifetime.Scoped);
-            builder.Register<GameplayHudPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<LevelFinishedHandler>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<GameplayHudPresenter>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)
                 .WithParameter("scopeName", nameof(GameplayLifetimeScope));
             builder.RegisterBuildCallback(resolver => resolver.Resolve<ScopeLifetimeProbe>());
-            builder.RegisterBuildCallback(resolver => resolver.Resolve<LevelFinishedHandler>());
-            builder.RegisterBuildCallback(resolver => resolver.Resolve<GameplayHudPresenter>());
         }
     }
 }

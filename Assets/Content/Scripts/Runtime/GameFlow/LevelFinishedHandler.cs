@@ -2,10 +2,11 @@ using System;
 using Arkanoid.Ball;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.Levels;
+using VContainer.Unity;
 
 namespace Arkanoid.GameFlow
 {
-    internal sealed class LevelFinishedHandler : IDisposable
+    internal sealed class LevelFinishedHandler : IStartable, IDisposable
     {
         private readonly LevelView _levelView;
         private readonly BallController _ballController;
@@ -16,6 +17,10 @@ namespace Arkanoid.GameFlow
             _levelView = levelView;
             _ballController = ballController;
             _gameSession = gameSession;
+        }
+
+        public void Start()
+        {
             _levelView.Finished += OnLevelFinished;
         }
 

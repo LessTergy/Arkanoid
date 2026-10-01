@@ -51,11 +51,6 @@ namespace Arkanoid.Core.GameFlow
             Handle(GameSessionSignal.CompleteLevel);
         }
 
-        public void Restart()
-        {
-            Handle(GameSessionSignal.Restart);
-        }
-
         private bool Handle(GameSessionSignal signal)
         {
             var nextState = _currentState.Handle(signal);

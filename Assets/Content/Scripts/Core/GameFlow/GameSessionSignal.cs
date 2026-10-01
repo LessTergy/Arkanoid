@@ -6,7 +6,6 @@ namespace Arkanoid.Core.GameFlow
         LoseLife = 1,
         ResumeAfterLifeLoss = 2,
         EndGame = 3,
-        CompleteLevel = 4,
-        Restart = 5
+        CompleteLevel = 4
     }
 }

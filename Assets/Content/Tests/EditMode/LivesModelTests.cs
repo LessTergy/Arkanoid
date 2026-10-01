@@ -25,23 +25,5 @@ namespace Arkanoid.Tests.EditMode
             Assert.AreEqual(0, lives.RemainingLives);
             CollectionAssert.AreEqual(new[] { 2, 1, 0 }, changes);
         }
-
-        [Test]
-        public void Reset_RestoresLivesAndReportsOnlyActualChanges()
-        {
-            var lives = new LivesModel();
-            var changes = new List<int>();
-            lives.LivesChanged += changes.Add;
-
-            lives.Reset();
-            Assert.IsEmpty(changes);
-
-            Assert.IsTrue(lives.TryLoseLife());
-            lives.Reset();
-            lives.Reset();
-
-            Assert.AreEqual(LivesModel.InitialLives, lives.RemainingLives);
-            CollectionAssert.AreEqual(new[] { 2, 3 }, changes);
-        }
     }
 }

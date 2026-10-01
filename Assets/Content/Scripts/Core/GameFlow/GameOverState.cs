@@ -6,11 +6,6 @@ namespace Arkanoid.Core.GameFlow
 
         public override GameSessionState? Handle(GameSessionSignal signal)
         {
-            if (signal == GameSessionSignal.Restart)
-            {
-                return GameSessionState.Ready;
-            }
-
             return null;
         }
     }

@@ -26,7 +26,7 @@ namespace Arkanoid.Tests.EditMode
         }
 
         [Test]
-        public void LifeLost_CanEndGameAndRestart()
+        public void LifeLost_CanEndGame()
         {
             var session = new GameSession();
             var states = new List<GameSessionState>();
@@ -36,16 +36,14 @@ namespace Arkanoid.Tests.EditMode
             session.TryLoseLife();
             session.EndGame();
             Assert.AreEqual(GameSessionState.GameOver, session.State);
-            session.Restart();
 
-            Assert.AreEqual(GameSessionState.Ready, session.State);
             CollectionAssert.AreEqual(
-                new[] { GameSessionState.Playing, GameSessionState.LifeLost, GameSessionState.GameOver, GameSessionState.Ready },
+                new[] { GameSessionState.Playing, GameSessionState.LifeLost, GameSessionState.GameOver },
                 states);
         }
 
         [Test]
-        public void LevelComplete_CanRestart()
+        public void LevelComplete_IsTerminalInCurrentSession()
         {
             var session = new GameSession();
             var states = new List<GameSessionState>();
@@ -59,11 +57,9 @@ namespace Arkanoid.Tests.EditMode
             session.CompleteLevel();
             session.EndGame();
             Assert.AreEqual(GameSessionState.LevelComplete, session.State);
-            session.Restart();
 
-            Assert.AreEqual(GameSessionState.Ready, session.State);
             CollectionAssert.AreEqual(
-                new[] { GameSessionState.Playing, GameSessionState.LevelComplete, GameSessionState.Ready },
+                new[] { GameSessionState.Playing, GameSessionState.LevelComplete },
                 states);
         }
 
@@ -78,21 +74,18 @@ namespace Arkanoid.Tests.EditMode
             session.ResumeAfterLifeLoss();
             session.EndGame();
             session.CompleteLevel();
-            session.Restart();
             Assert.AreEqual(GameSessionState.Ready, session.State);
             Assert.IsEmpty(states);
 
             Assert.IsTrue(session.TryStartPlaying());
             Assert.IsFalse(session.TryStartPlaying());
             session.EndGame();
-            session.Restart();
             Assert.AreEqual(GameSessionState.Playing, session.State);
 
             Assert.IsTrue(session.TryLoseLife());
             Assert.IsFalse(session.TryLoseLife());
             Assert.IsFalse(session.TryStartPlaying());
             session.CompleteLevel();
-            session.Restart();
             Assert.AreEqual(GameSessionState.LifeLost, session.State);
 
             session.EndGame();

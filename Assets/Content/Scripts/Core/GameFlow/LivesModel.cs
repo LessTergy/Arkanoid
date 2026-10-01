@@ -21,16 +21,5 @@ namespace Arkanoid.Core.GameFlow
             LivesChanged?.Invoke(RemainingLives);
             return true;
         }
-
-        public void Reset()
-        {
-            if (RemainingLives == InitialLives)
-            {
-                return;
-            }
-
-            RemainingLives = InitialLives;
-            LivesChanged?.Invoke(RemainingLives);
-        }
     }
 }

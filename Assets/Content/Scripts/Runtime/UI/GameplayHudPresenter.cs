@@ -38,7 +38,7 @@ namespace Arkanoid.UI
             OnLivesChanged(_livesModel.RemainingLives);
             OnGameSessionStateChanged(_gameSession.State);
             OnPauseChanged(_pauseController.IsPaused);
-            _view.SetScoreText("Score: 0");
+            _view.SetScore(0);
             _view.SetRestartEnabled(true);
         }
 
@@ -53,7 +53,7 @@ namespace Arkanoid.UI
 
         private void OnLivesChanged(int remainingLives)
         {
-            _view.SetLivesText($"Lives: {remainingLives}");
+            _view.SetLivesCount(remainingLives);
         }
 
         private void OnRestartRequested()
@@ -70,7 +70,7 @@ namespace Arkanoid.UI
 
         private void OnPauseChanged(bool isPaused)
         {
-            _view.SetPauseText(isPaused ? "Resume" : "Pause");
+            _view.SetPaused(isPaused);
         }
 
         private void OnGameSessionStateChanged(GameSessionState state)

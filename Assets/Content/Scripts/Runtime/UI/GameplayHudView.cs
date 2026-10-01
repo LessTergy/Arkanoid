@@ -12,6 +12,10 @@ namespace Arkanoid.UI
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _pauseButton;
         [SerializeField] private TMP_Text _pauseButtonText;
+        [SerializeField] private string _livesFormat = "Lives: {0}";
+        [SerializeField] private string _scoreFormat = "Score: {0}";
+        [SerializeField] private string _pauseLabel = "Pause";
+        [SerializeField] private string _resumeLabel = "Resume";
 
         public event Action RestartRequested;
         public event Action PauseRequested;
@@ -28,14 +32,14 @@ namespace Arkanoid.UI
             _pauseButton.onClick.RemoveListener(OnPauseClicked);
         }
 
-        public void SetLivesText(string value)
+        public void SetLivesCount(int remainingLives)
         {
-            _livesText.text = value;
+            _livesText.text = string.Format(_livesFormat, remainingLives);
         }
 
-        public void SetScoreText(string value)
+        public void SetScore(int score)
         {
-            _scoreText.text = value;
+            _scoreText.text = string.Format(_scoreFormat, score);
         }
 
         public void SetRestartEnabled(bool value)
@@ -48,9 +52,9 @@ namespace Arkanoid.UI
             _pauseButton.interactable = value;
         }
 
-        public void SetPauseText(string value)
+        public void SetPaused(bool isPaused)
         {
-            _pauseButtonText.text = value;
+            _pauseButtonText.text = isPaused ? _resumeLabel : _pauseLabel;
         }
 
         private void OnRestartClicked()

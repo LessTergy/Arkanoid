@@ -7,19 +7,19 @@ namespace Arkanoid.Ball
     {
         private const float MinimumVelocitySqrMagnitude = 0.000001f;
 
-        private readonly BallView _view;
+        private readonly BallController _controller;
         private readonly PaddleMovement _paddleMovement;
         private readonly PaddleConfig _paddleConfig;
         private readonly BallConfig _config;
         private Vector2 _lastFlyingDirection;
 
         public BallFlyingState(
-            BallView view,
+            BallController controller,
             PaddleMovement paddleMovement,
             PaddleConfig paddleConfig,
             BallConfig config)
         {
-            _view = view;
+            _controller = controller;
             _paddleMovement = paddleMovement;
             _paddleConfig = paddleConfig;
             _config = config;
@@ -29,7 +29,7 @@ namespace Arkanoid.Ball
 
         public override void Enter()
         {
-            _view.HoldAbove(_paddleMovement.transform);
+            _controller.PlaceAbovePaddle();
             var minimumAngle = Mathf.Min(_config.MinimumLaunchAngleDegrees, _config.MaximumLaunchAngleDegrees);
             var maximumAngle = Mathf.Max(_config.MinimumLaunchAngleDegrees, _config.MaximumLaunchAngleDegrees);
             var angle = Random.Range(minimumAngle, maximumAngle);
@@ -37,12 +37,12 @@ namespace Arkanoid.Ball
             _lastFlyingDirection = BallBounceCalculator.CalculateLaunchDirection(
                 angle, horizontalSign,
                 _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
-            _view.Launch(_lastFlyingDirection, _config.Speed);
+            _controller.LaunchPhysics(_lastFlyingDirection, _config.Speed);
         }
 
         public override void FixedUpdate()
         {
-            var velocity = _view.Body.linearVelocity;
+            var velocity = _controller.Rigidbody.linearVelocity;
             if (velocity.sqrMagnitude > MinimumVelocitySqrMagnitude)
             {
                 _lastFlyingDirection = BallBounceCalculator.LimitDirection(
@@ -50,13 +50,14 @@ namespace Arkanoid.Ball
                     _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
             }
 
-            _view.Body.linearVelocity = _lastFlyingDirection * _config.Speed;
+            _controller.Rigidbody.linearVelocity = _lastFlyingDirection * _config.Speed;
         }
 
         public override void OnCollisionEnter2D(Collision2D collision)
         {
-            if (collision.gameObject != _paddleMovement.gameObject
-                || _view.Body.position.y <= _paddleMovement.transform.position.y)
+            var shouldSkipPaddleBounce = collision.gameObject != _paddleMovement.gameObject
+                || _controller.Rigidbody.position.y <= _paddleMovement.transform.position.y;
+            if (shouldSkipPaddleBounce)
             {
                 return;
             }
@@ -70,14 +71,14 @@ namespace Arkanoid.Ball
             _lastFlyingDirection = BallBounceCalculator.LimitDirection(
                 direction, _lastFlyingDirection,
                 _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
-            _view.Body.linearVelocity = _lastFlyingDirection * _config.Speed;
+            _controller.Rigidbody.linearVelocity = _lastFlyingDirection * _config.Speed;
         }
 
 #if UNITY_EDITOR
         public override void OnDrawGizmos()
         {
-            var direction = _view.Body.linearVelocity.normalized;
-            var start = _view.Transform.position;
+            var direction = _controller.Rigidbody.linearVelocity.normalized;
+            var start = _controller.transform.position;
             var end = start + (Vector3)(direction * 2f);
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(start, end);

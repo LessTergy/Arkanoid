@@ -15,7 +15,7 @@ namespace Arkanoid.Ball
         private PaddleMovement _paddleMovement;
         private PaddleConfig _paddleConfig;
         private BallConfig _config;
-        private BallView _view;
+        private Rigidbody2D _rigidbody;
         private BallAttachedState _attachedState;
         private BallFlyingState _flyingState;
         private BallLostState _lostState;
@@ -23,6 +23,7 @@ namespace Arkanoid.Ball
         private BallStateBase _currentState;
 
         public BallState State => _currentState?.Id ?? BallState.Attached;
+        internal Rigidbody2D Rigidbody => _rigidbody;
 
         [Inject]
         public void Construct(
@@ -37,15 +38,18 @@ namespace Arkanoid.Ball
 
         private void Awake()
         {
-            _view = new BallView(GetComponent<Rigidbody2D>(), transform, () => _attachedOffsetY);
+            _rigidbody = GetComponent<Rigidbody2D>();
+            _rigidbody.bodyType = RigidbodyType2D.Dynamic;
+            _rigidbody.gravityScale = 0f;
+            _rigidbody.simulated = false;
         }
 
         private void Start()
         {
-            _flyingState = new BallFlyingState(_view, _paddleMovement, _paddleConfig, _config);
-            _attachedState = new BallAttachedState(_view, _paddleMovement);
-            _lostState = new BallLostState(_view);
-            _stoppedState = new BallStoppedState(_view);
+            _flyingState = new BallFlyingState(this, _paddleMovement, _paddleConfig, _config);
+            _attachedState = new BallAttachedState(this);
+            _lostState = new BallLostState(this);
+            _stoppedState = new BallStoppedState(this);
             ChangeState(_attachedState);
         }
 
@@ -67,7 +71,7 @@ namespace Arkanoid.Ball
                 return;
             }
 
-            var velocity = _view.Body.linearVelocity;
+            var velocity = _rigidbody.linearVelocity;
             var safeArea = Screen.safeArea;
             var fontSize = Mathf.Clamp(Mathf.RoundToInt(safeArea.width / 100f), 14, 24);
             var style = new GUIStyle(GUI.skin.box)
@@ -121,12 +125,29 @@ namespace Arkanoid.Ball
 
         public void PlaceAbovePaddle()
         {
-            _view.HoldAbove(_paddleMovement.transform);
+            var paddlePosition = _paddleMovement.transform.position;
+            var position = transform.position;
+            transform.position = new Vector3(
+                paddlePosition.x, paddlePosition.y + _attachedOffsetY, position.z);
         }
 
         public void StopMovement()
         {
             ChangeState(_stoppedState);
+        }
+
+        internal void LaunchPhysics(Vector2 direction, float speed)
+        {
+            var position = transform.position;
+            _rigidbody.position = new Vector2(position.x, position.y);
+            _rigidbody.simulated = true;
+            _rigidbody.linearVelocity = direction * speed;
+        }
+
+        internal void StopPhysics()
+        {
+            _rigidbody.linearVelocity = Vector2.zero;
+            _rigidbody.simulated = false;
         }
 
         private void ChangeState(BallStateBase nextState)

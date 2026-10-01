@@ -2,18 +2,18 @@ namespace Arkanoid.Ball
 {
     internal sealed class BallLostState : BallStateBase
     {
-        private readonly BallView _view;
+        private readonly BallController _controller;
 
-        public BallLostState(BallView view)
+        public BallLostState(BallController controller)
         {
-            _view = view;
+            _controller = controller;
         }
 
         public override BallState Id => BallState.Lost;
 
         public override void Enter()
         {
-            _view.Stop();
+            _controller.StopPhysics();
         }
     }
 }

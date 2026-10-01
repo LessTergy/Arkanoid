@@ -1,29 +1,25 @@
-using Arkanoid.Paddle;
-
 namespace Arkanoid.Ball
 {
     internal sealed class BallAttachedState : BallStateBase
     {
-        private readonly BallView _view;
-        private readonly PaddleMovement _paddleMovement;
+        private readonly BallController _controller;
 
-        public BallAttachedState(BallView view, PaddleMovement paddleMovement)
+        public BallAttachedState(BallController controller)
         {
-            _view = view;
-            _paddleMovement = paddleMovement;
+            _controller = controller;
         }
 
         public override BallState Id => BallState.Attached;
 
         public override void Enter()
         {
-            _view.Stop();
-            _view.HoldAbove(_paddleMovement.transform);
+            _controller.StopPhysics();
+            _controller.PlaceAbovePaddle();
         }
 
         public override void LateUpdate()
         {
-            _view.HoldAbove(_paddleMovement.transform);
+            _controller.PlaceAbovePaddle();
         }
     }
 }

@@ -39,6 +39,7 @@ namespace Arkanoid
             builder.Register<GameSession>(Lifetime.Scoped);
             builder.Register<LivesModel>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameplayPauseController>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<LifeLossHandler>(Lifetime.Scoped);
             builder.Register<LevelFinishedHandler>(Lifetime.Scoped);
             builder.Register<GameplayHudPresenter>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)

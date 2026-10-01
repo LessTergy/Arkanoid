@@ -65,7 +65,15 @@ namespace Arkanoid.Tests.PlayMode
             var initialPaddlePosition = paddleBody.position;
             var stateChanges = new List<GameSessionState>();
             var lifeChanges = new List<int>();
-            session.StateChanged += stateChanges.Add;
+            var livesAtLifeLost = new List<int>();
+            session.StateChanged += state =>
+            {
+                stateChanges.Add(state);
+                if (state == GameSessionState.LifeLost)
+                {
+                    livesAtLifeLost.Add(lives.RemainingLives);
+                }
+            };
             lives.LivesChanged += lifeChanges.Add;
             Assert.AreEqual(GameSessionState.Ready, session.State);
             Assert.AreEqual(LivesModel.InitialLives, lives.RemainingLives);
@@ -127,6 +135,7 @@ namespace Arkanoid.Tests.PlayMode
             }
 
             CollectionAssert.AreEqual(new[] { 2, 1, 0 }, lifeChanges);
+            CollectionAssert.AreEqual(new[] { 2, 1, 0 }, livesAtLifeLost);
             CollectionAssert.AreEqual(
                 new[]
                 {

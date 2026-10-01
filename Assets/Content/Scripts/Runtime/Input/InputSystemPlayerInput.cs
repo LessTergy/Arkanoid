@@ -5,11 +5,14 @@ namespace Arkanoid.Input
 {
     public sealed class InputSystemPlayerInput : MonoBehaviour, IPlayerInput
     {
+        [Header("Actions")]
         [SerializeField] private InputActionReference _move;
         [SerializeField] private InputActionReference _touchPosition;
         [SerializeField] private InputActionReference _touchPress;
         [SerializeField] private InputActionReference _launch;
         [SerializeField] private InputActionReference _pause;
+
+        [Header("Camera")]
         [SerializeField] private Camera _gameplayCamera;
 
         private bool _gameplayInputEnabled = true;

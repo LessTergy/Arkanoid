@@ -7,15 +7,18 @@ namespace Arkanoid.UI
 {
     public sealed class GameplayHudView : MonoBehaviour
     {
+        [Header("Text")]
         [SerializeField] private TMP_Text _livesText;
         [SerializeField] private TMP_Text _scoreText;
-        [SerializeField] private Button _restartButton;
-        [SerializeField] private Button _pauseButton;
         [SerializeField] private TMP_Text _pauseButtonText;
         [SerializeField] private string _livesFormat = "Lives: {0}";
         [SerializeField] private string _scoreFormat = "Score: {0}";
         [SerializeField] private string _pauseLabel = "Pause";
         [SerializeField] private string _resumeLabel = "Resume";
+
+        [Header("Buttons")]
+        [SerializeField] private Button _restartButton;
+        [SerializeField] private Button _pauseButton;
 
         public event Action RestartRequested;
         public event Action PauseRequested;

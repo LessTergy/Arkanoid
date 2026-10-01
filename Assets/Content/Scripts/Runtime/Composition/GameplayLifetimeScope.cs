@@ -15,14 +15,23 @@ namespace Arkanoid
 {
     public sealed class GameplayLifetimeScope : LifetimeScope
     {
+        [Header("Input")]
         [SerializeField] private InputSystemPlayerInput _playerInput;
+
+        [Header("Paddle")]
         [SerializeField] private PaddleMovement _paddleMovement;
         [SerializeField] private PaddleConfig _paddleConfig;
+
+        [Header("Ball")]
         [SerializeField] private BallController _ballController;
         [SerializeField] private BallConfig _ballConfig;
+
+        [Header("Level")]
         [SerializeField] private PlayfieldCamera _playfieldCamera;
         [SerializeField] private DeathZone _deathZone;
         [SerializeField] private LevelView _levelView;
+
+        [Header("UI")]
         [SerializeField] private GameplayHudView _hudView;
 
         protected override void Configure(IContainerBuilder builder)

@@ -169,5 +169,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c67bb62d27444c9b430d9b64622bb44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Ball.BallController
-  _attachedOffsetY: 0.5
+  _offsetY: 0.05
   _showDebugOverlay: 0

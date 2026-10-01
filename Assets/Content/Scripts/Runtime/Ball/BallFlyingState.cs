@@ -9,19 +9,16 @@ namespace Arkanoid.Ball
 
         private readonly BallController _controller;
         private readonly PaddleMovement _paddleMovement;
-        private readonly PaddleConfig _paddleConfig;
         private readonly BallConfig _config;
         private Vector2 _lastFlyingDirection;
 
         public BallFlyingState(
             BallController controller,
             PaddleMovement paddleMovement,
-            PaddleConfig paddleConfig,
             BallConfig config)
         {
             _controller = controller;
             _paddleMovement = paddleMovement;
-            _paddleConfig = paddleConfig;
             _config = config;
         }
 
@@ -55,23 +52,30 @@ namespace Arkanoid.Ball
 
         public override void OnCollisionEnter2D(Collision2D collision)
         {
-            var shouldSkipPaddleBounce = collision.gameObject != _paddleMovement.gameObject
-                || _controller.Rigidbody.position.y <= _paddleMovement.transform.position.y;
-            if (shouldSkipPaddleBounce)
+            if (!ShouldBounceOffPaddle(collision))
             {
                 return;
             }
 
             var contactX = collision.GetContact(0).point.x;
-            var paddleCenterX = _paddleMovement.transform.position.x;
+            var paddleCenterX = _paddleMovement.Collider.bounds.center.x;
             // Override the solver's reflection so the hit position controls the bounce direction.
             var direction = BallBounceCalculator.CalculatePaddleBounceDirection(
-                contactX, paddleCenterX, _paddleConfig.Width, _config.MinimumVerticalComponent);
+                contactX, paddleCenterX, _paddleMovement.Width, _config.MinimumVerticalComponent);
 
             _lastFlyingDirection = BallBounceCalculator.LimitDirection(
                 direction, _lastFlyingDirection,
                 _config.MinimumHorizontalComponent, _config.MinimumVerticalComponent);
             _controller.Rigidbody.linearVelocity = _lastFlyingDirection * _config.Speed;
+        }
+
+        private bool ShouldBounceOffPaddle(Collision2D collision)
+        {
+            var hitPaddle = collision.gameObject == _paddleMovement.gameObject;
+            var ballIsDescending = _lastFlyingDirection.y < 0f;
+            var ballIsAbovePaddle = _controller.Rigidbody.position.y > _paddleMovement.transform.position.y;
+
+            return hitPaddle && ballIsDescending && ballIsAbovePaddle;
         }
 
 #if UNITY_EDITOR

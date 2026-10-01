@@ -4,18 +4,18 @@ using VContainer;
 
 namespace Arkanoid.Ball
 {
-    [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D))]
     public sealed class BallController : MonoBehaviour
     {
-        [SerializeField, Min(0f)] private float _attachedOffsetY = 0.5f;
+        [SerializeField, Min(0f)] private float _offsetY;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         [SerializeField] private bool _showDebugOverlay = true;
 #endif
 
         private PaddleMovement _paddleMovement;
-        private PaddleConfig _paddleConfig;
         private BallConfig _config;
         private Rigidbody2D _rigidbody;
+        private CircleCollider2D _collider;
         private BallAttachedState _attachedState;
         private BallFlyingState _flyingState;
         private BallLostState _lostState;
@@ -28,17 +28,16 @@ namespace Arkanoid.Ball
         [Inject]
         public void Construct(
             PaddleMovement paddleMovement,
-            PaddleConfig paddleConfig,
             BallConfig config)
         {
             _paddleMovement = paddleMovement;
-            _paddleConfig = paddleConfig;
             _config = config;
         }
 
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+            _collider = GetComponent<CircleCollider2D>();
             _rigidbody.bodyType = RigidbodyType2D.Dynamic;
             _rigidbody.gravityScale = 0f;
             _rigidbody.simulated = false;
@@ -46,7 +45,7 @@ namespace Arkanoid.Ball
 
         private void Start()
         {
-            _flyingState = new BallFlyingState(this, _paddleMovement, _paddleConfig, _config);
+            _flyingState = new BallFlyingState(this, _paddleMovement, _config);
             _attachedState = new BallAttachedState(this);
             _lostState = new BallLostState(this);
             _stoppedState = new BallStoppedState(this);
@@ -125,10 +124,17 @@ namespace Arkanoid.Ball
 
         public void PlaceAbovePaddle()
         {
-            var paddlePosition = _paddleMovement.transform.position;
-            var position = transform.position;
+            var paddleBounds = _paddleMovement.Collider.bounds;
+            var ballScale = transform.localScale;
+            var ballColliderOffsetX = _collider.offset.x * ballScale.x;
+            var ballColliderOffsetY = _collider.offset.y * ballScale.y;
+            var ballRadius = _collider.radius * Mathf.Abs(ballScale.y);
+            var ballPositionY = paddleBounds.max.y + ballRadius - ballColliderOffsetY + Mathf.Max(0f, _offsetY);
+            
             transform.position = new Vector3(
-                paddlePosition.x, paddlePosition.y + _attachedOffsetY, position.z);
+                paddleBounds.center.x - ballColliderOffsetX,
+                ballPositionY,
+                transform.position.z);
         }
 
         public void StopMovement()

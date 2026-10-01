@@ -89,6 +89,19 @@ namespace Arkanoid.Tests.PlayMode
 
                 InputSystem.QueueStateEvent(_keyboard, new KeyboardState());
                 yield return null;
+
+                if (hit == 1)
+                {
+                    var stateChangeCount = stateChanges.Count;
+                    InputSystem.QueueStateEvent(_keyboard, new KeyboardState(Key.Space));
+                    yield return null;
+                    Assert.AreEqual(stateChangeCount, stateChanges.Count,
+                        "Pressing Launch during flight must not start the session again.");
+                    Assert.AreEqual(BallState.Flying, ball.State);
+                    InputSystem.QueueStateEvent(_keyboard, new KeyboardState());
+                    yield return null;
+                }
+
                 yield return new WaitForFixedUpdate();
                 yield return null;
 

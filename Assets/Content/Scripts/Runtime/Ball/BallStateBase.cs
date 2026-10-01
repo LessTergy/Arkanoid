@@ -8,11 +8,6 @@ namespace Arkanoid.Ball
 
         public abstract void Enter();
 
-        public virtual BallStateBase Update()
-        {
-            return null;
-        }
-
         public virtual void LateUpdate()
         {
         }

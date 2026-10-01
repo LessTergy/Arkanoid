@@ -106,6 +106,14 @@ namespace Arkanoid.Tests.PlayMode
             Assert.AreEqual(0, level.RemainingBricks);
             Assert.AreEqual(GameSessionState.LevelComplete, session.State);
             Assert.AreEqual(BallState.Stopped, ball.State);
+
+            InputSystem.QueueStateEvent(_keyboard, new KeyboardState());
+            yield return null;
+            InputSystem.QueueStateEvent(_keyboard, new KeyboardState(Key.Space));
+            yield return null;
+            Assert.AreEqual(GameSessionState.LevelComplete, session.State);
+            Assert.AreEqual(BallState.Stopped, ball.State);
+            Assert.IsFalse(body.simulated);
         }
 
         [UnityTearDown]

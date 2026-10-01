@@ -1,5 +1,3 @@
-using Arkanoid.Core.GameFlow;
-using Arkanoid.Input;
 using Arkanoid.Paddle;
 using UnityEngine;
 using VContainer;
@@ -14,8 +12,6 @@ namespace Arkanoid.Ball
         [SerializeField] private bool _showDebugOverlay = true;
 #endif
 
-        private IPlayerInput _playerInput;
-        private GameSession _gameSession;
         private PaddleMovement _paddleMovement;
         private PaddleConfig _paddleConfig;
         private BallConfig _config;
@@ -30,14 +26,10 @@ namespace Arkanoid.Ball
 
         [Inject]
         public void Construct(
-            IPlayerInput playerInput,
-            GameSession gameSession,
             PaddleMovement paddleMovement,
             PaddleConfig paddleConfig,
             BallConfig config)
         {
-            _playerInput = playerInput;
-            _gameSession = gameSession;
             _paddleMovement = paddleMovement;
             _paddleConfig = paddleConfig;
             _config = config;
@@ -51,19 +43,10 @@ namespace Arkanoid.Ball
         private void Start()
         {
             _flyingState = new BallFlyingState(_view, _paddleMovement, _paddleConfig, _config);
-            _attachedState = new BallAttachedState(_view, _playerInput, _gameSession, _paddleMovement, _flyingState);
+            _attachedState = new BallAttachedState(_view, _paddleMovement);
             _lostState = new BallLostState(_view);
             _stoppedState = new BallStoppedState(_view);
             ChangeState(_attachedState);
-        }
-
-        private void Update()
-        {
-            var nextState = _currentState.Update();
-            if (nextState != null)
-            {
-                ChangeState(nextState);
-            }
         }
 
         private void LateUpdate()
@@ -92,9 +75,9 @@ namespace Arkanoid.Ball
                 alignment = TextAnchor.MiddleLeft,
                 fontSize = fontSize
             };
-            var text = $"Session: {_gameSession.State}\nBall: {State}\nSpeed: {velocity.magnitude:F2} units/s";
+            var text = $"Ball: {State}\nSpeed: {velocity.magnitude:F2} units/s";
             var width = Mathf.Min(safeArea.width - 24f, fontSize * 19f);
-            var height = fontSize * 4.2f;
+            var height = fontSize * 3.2f;
             var bounds = new Rect(
                 safeArea.xMax - 12f - width,
                 Screen.height - safeArea.yMin - 12f - height,
@@ -119,6 +102,11 @@ namespace Arkanoid.Ball
         private void OnCollisionEnter2D(Collision2D collision)
         {
             _currentState.OnCollisionEnter2D(collision);
+        }
+
+        public void Launch()
+        {
+            ChangeState(_flyingState);
         }
 
         public void Lose()

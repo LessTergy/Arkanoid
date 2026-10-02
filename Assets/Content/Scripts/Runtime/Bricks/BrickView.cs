@@ -21,7 +21,12 @@ namespace Arkanoid.Bricks
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (_destroyed || !collision.gameObject.TryGetComponent<BallController>(out _))
+            if (_destroyed)
+            {
+                return;
+            }
+
+            if (!collision.gameObject.TryGetComponent<BallController>(out _))
             {
                 return;
             }

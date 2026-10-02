@@ -19,8 +19,9 @@ namespace Arkanoid.GameFlow
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (!other.TryGetComponent<BallController>(out var ball)
-                || ball != _ballController)
+            var ballEntered = other.TryGetComponent<BallController>(out var ball)
+                && ball == _ballController;
+            if (!ballEntered)
             {
                 return;
             }

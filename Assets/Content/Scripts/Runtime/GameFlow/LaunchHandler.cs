@@ -20,10 +20,17 @@ namespace Arkanoid.GameFlow
 
         public void Tick()
         {
-            if (_playerInput.LaunchPressedThisFrame && _gameSession.TryStartPlaying())
+            if (!_playerInput.LaunchPressedThisFrame)
             {
-                _ballController.Launch();
+                return;
             }
+
+            if (!_gameSession.TryStartPlaying())
+            {
+                return;
+            }
+
+            _ballController.Launch();
         }
     }
 }

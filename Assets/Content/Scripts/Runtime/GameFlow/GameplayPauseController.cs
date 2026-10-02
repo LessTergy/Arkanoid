@@ -50,8 +50,9 @@ namespace Arkanoid.GameFlow
                 return;
             }
 
-            if (_gameSession.State != GameSessionState.Ready
-                && _gameSession.State != GameSessionState.Playing)
+            var sessionAllowsPause = _gameSession.State == GameSessionState.Ready
+                || _gameSession.State == GameSessionState.Playing;
+            if (!sessionAllowsPause)
             {
                 return;
             }
@@ -86,7 +87,8 @@ namespace Arkanoid.GameFlow
 
         private void OnGameSessionStateChanged(GameSessionState state)
         {
-            if (state != GameSessionState.Ready && state != GameSessionState.Playing)
+            var sessionAllowsPause = state == GameSessionState.Ready || state == GameSessionState.Playing;
+            if (!sessionAllowsPause)
             {
                 Resume();
             }

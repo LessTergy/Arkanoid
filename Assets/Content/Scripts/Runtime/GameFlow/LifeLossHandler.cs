@@ -40,7 +40,12 @@ namespace Arkanoid.GameFlow
 
         private void OnBallEntered()
         {
-            if (_gameSession.State != GameSessionState.Playing || !_livesModel.TryLoseLife())
+            if (_gameSession.State != GameSessionState.Playing)
+            {
+                return;
+            }
+
+            if (!_livesModel.TryLoseLife())
             {
                 return;
             }

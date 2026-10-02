@@ -35,7 +35,9 @@ namespace Arkanoid.Paddle
             _boxCollider = GetComponent<BoxCollider2D>();
             _initialPosition = _body.position;
 
-            if (_spriteRenderer.sprite == null || _spriteRenderer.drawMode != SpriteDrawMode.Sliced)
+            var hasSlicedSprite = _spriteRenderer.sprite != null
+                && _spriteRenderer.drawMode == SpriteDrawMode.Sliced;
+            if (!hasSlicedSprite)
             {
                 throw new InvalidOperationException("Paddle SpriteRenderer must have a sprite and use Sliced draw mode.");
             }

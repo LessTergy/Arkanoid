@@ -42,9 +42,10 @@ namespace Arkanoid.Playfield
             var screenHeight = Screen.height;
             var orientation = Screen.orientation;
 
-            if (screenWidth == _lastScreenSize.x
-                && screenHeight == _lastScreenSize.y
-                && orientation == _lastOrientation)
+            var needRefresh = screenWidth != _lastScreenSize.x 
+                              || screenHeight != _lastScreenSize.y
+                              || orientation != _lastOrientation;
+            if (!needRefresh)
             {
                 return;
             }

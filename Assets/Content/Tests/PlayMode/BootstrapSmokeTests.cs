@@ -1,5 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
+using Arkanoid.Core.GameFlow;
 using Arkanoid.GameFlow;
+using Arkanoid.Input;
 using DG.Tweening;
 using NUnit.Framework;
 using UnityEngine;
@@ -7,6 +10,8 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using VContainer;
+using VContainer.Unity;
 
 namespace Arkanoid.Tests.PlayMode
 {
@@ -49,6 +54,24 @@ namespace Arkanoid.Tests.PlayMode
             Assert.AreEqual(gameplayScope.gameObject.scene, SceneManager.GetActiveScene());
             Assert.AreNotEqual(bootstrapPath, SceneManager.GetActiveScene().path);
 
+            Assert.AreSame(navigator, gameplayScope.Container.Resolve<SceneNavigator>());
+            Assert.IsNotNull(gameplayScope.Container.Resolve<GameSession>());
+            Assert.IsNotNull(gameplayScope.Container.Resolve<LivesModel>());
+            Assert.IsNotNull(gameplayScope.Container.Resolve<IPlayerInput>());
+
+            var appStartables = appScope.Container.Resolve<IReadOnlyList<IStartable>>();
+            AssertHasEntryPoint(appStartables, "BootstrapEntryPoint");
+
+            var gameplayStartables = gameplayScope.Container.Resolve<IReadOnlyList<IStartable>>();
+            AssertHasEntryPoint(gameplayStartables, "GameplayPauseController");
+            AssertHasEntryPoint(gameplayStartables, "LifeLossHandler");
+            AssertHasEntryPoint(gameplayStartables, "LevelFinishedHandler");
+            AssertHasEntryPoint(gameplayStartables, "GameplayHudPresenter");
+
+            var gameplayTickables = gameplayScope.Container.Resolve<IReadOnlyList<ITickable>>();
+            AssertHasEntryPoint(gameplayTickables, "GameplayPauseController");
+            AssertHasEntryPoint(gameplayTickables, "LaunchHandler");
+
             var addressablesHandle = Addressables.InitializeAsync(false);
             try
             {
@@ -66,6 +89,19 @@ namespace Arkanoid.Tests.PlayMode
             yield return SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
             Assert.IsTrue(gameplayScope == null, "GameplayLifetimeScope survived scene unload.");
             Assert.AreSame(appScope, Object.FindFirstObjectByType<AppLifetimeScope>());
+        }
+
+        private static void AssertHasEntryPoint<T>(IReadOnlyList<T> entryPoints, string typeName)
+        {
+            foreach (var entryPoint in entryPoints)
+            {
+                if (entryPoint.GetType().Name == typeName)
+                {
+                    return;
+                }
+            }
+
+            Assert.Fail($"{typeName} was not resolved as {typeof(T).Name}.");
         }
     }
 }

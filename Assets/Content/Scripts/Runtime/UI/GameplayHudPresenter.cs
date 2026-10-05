@@ -1,5 +1,6 @@
 using System;
 using Arkanoid.Core.GameFlow;
+using Arkanoid.Core.Score;
 using Arkanoid.GameFlow;
 using VContainer.Unity;
 
@@ -9,6 +10,8 @@ namespace Arkanoid.UI
     {
         private readonly GameplayHudView _view;
         private readonly LivesModel _livesModel;
+        private readonly ScoreService _scoreService;
+        private readonly ComboModel _comboModel;
         private readonly GameSession _gameSession;
         private readonly GameplayPauseController _pauseController;
         private readonly SceneNavigator _sceneNavigator;
@@ -16,12 +19,16 @@ namespace Arkanoid.UI
         public GameplayHudPresenter(
             GameplayHudView view,
             LivesModel livesModel,
+            ScoreService scoreService,
+            ComboModel comboModel,
             GameSession gameSession,
             GameplayPauseController pauseController,
             SceneNavigator sceneNavigator)
         {
             _view = view;
             _livesModel = livesModel;
+            _scoreService = scoreService;
+            _comboModel = comboModel;
             _gameSession = gameSession;
             _pauseController = pauseController;
             _sceneNavigator = sceneNavigator;
@@ -30,6 +37,8 @@ namespace Arkanoid.UI
         public void Start()
         {
             _livesModel.LivesChanged += OnLivesChanged;
+            _scoreService.ScoreChanged += OnScoreChanged;
+            _comboModel.ComboChanged += OnComboChanged;
             _gameSession.StateChanged += OnGameSessionStateChanged;
             _pauseController.PauseChanged += OnPauseChanged;
             _view.RestartRequested += OnRestartRequested;
@@ -38,13 +47,16 @@ namespace Arkanoid.UI
             OnLivesChanged(_livesModel.RemainingLives);
             OnGameSessionStateChanged(_gameSession.State);
             OnPauseChanged(_pauseController.IsPaused);
-            _view.SetScore(0);
+            OnScoreChanged(_scoreService.Total);
+            OnComboChanged(_comboModel.Count);
             _view.SetRestartEnabled(true);
         }
 
         public void Dispose()
         {
             _livesModel.LivesChanged -= OnLivesChanged;
+            _scoreService.ScoreChanged -= OnScoreChanged;
+            _comboModel.ComboChanged -= OnComboChanged;
             _gameSession.StateChanged -= OnGameSessionStateChanged;
             _pauseController.PauseChanged -= OnPauseChanged;
             _view.RestartRequested -= OnRestartRequested;
@@ -54,6 +66,16 @@ namespace Arkanoid.UI
         private void OnLivesChanged(int remainingLives)
         {
             _view.SetLivesCount(remainingLives);
+        }
+
+        private void OnScoreChanged(int total)
+        {
+            _view.SetScore(total);
+        }
+
+        private void OnComboChanged(int count)
+        {
+            _view.SetCombo(count);
         }
 
         private void OnRestartRequested()

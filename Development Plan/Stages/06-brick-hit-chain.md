@@ -6,9 +6,9 @@
 
 ## Задачи
 
-- [ ] `P6.1` Создать `BrickDefinition`: base score, max health, shield charges, indestructible flag, presentation reference/id.
+- [ ] `P6.1` Создать `BrickDefinition`: base score, max health, shield charges, indestructible flag, presentation reference/id. Передавать base score в расчёт этапа 5 вместо временного значения для `Basic`.
 - [ ] `P6.2` Создать runtime `BrickState`: current health, current shield, destroyed state. Не изменять ScriptableObject во время игры.
-- [ ] `P6.3` Определить `BrickHitRequest` и `BrickHitResult` с достаточными данными для feedback и score.
+- [ ] `P6.3` Определить `BrickHitRequest` и `BrickHitResult` с достаточными данными для feedback и score. Сохранить начисление очков при уничтожении блока; попадание в щит или прочный блок без уничтожения само по себе очков не даёт.
 - [ ] `P6.4` Записать порядок правил и точки short-circuit: indestructible прекращает обработку; shield поглощает удар; damage применяется только после снятия защиты.
 - [ ] `P6.5` Сравнить один явный `BrickHitProcessor`, таблицу правил и Chain of Responsibility. Зафиксировать, почему независимые handlers и ранняя остановка делают цепочку понятнее для запланированных защитных слоёв.
 - [ ] `P6.6` Определить узкий `IBrickHitHandler` и способ передать запрос следующему handler или завершить обработку с `BrickHitResult`.

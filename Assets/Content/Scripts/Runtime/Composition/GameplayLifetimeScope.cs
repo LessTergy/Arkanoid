@@ -1,6 +1,7 @@
 using Arkanoid.Ball;
 using Arkanoid.Composition;
 using Arkanoid.Core.GameFlow;
+using Arkanoid.Core.Score;
 using Arkanoid.GameFlow;
 using Arkanoid.Input;
 using Arkanoid.Levels;
@@ -47,9 +48,20 @@ namespace Arkanoid
             builder.RegisterComponent(_hudView);
             builder.Register<GameSession>(Lifetime.Scoped);
             builder.Register<LivesModel>(Lifetime.Scoped);
+            builder.Register<ComboModel>(Lifetime.Singleton);
+            builder.Register<DoubleScoreDecorator>(resolver =>
+                {
+                    var baseScore = new BaseScoreCalculator();
+                    var comboScore = new ComboScoreDecorator(baseScore, resolver.Resolve<ComboModel>());
+                    return new DoubleScoreDecorator(comboScore);
+                }, Lifetime.Singleton)
+                .AsSelf()
+                .As<IScoreCalculator>();
+            builder.Register<ScoreService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<GameplayPauseController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<LaunchHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LifeLossHandler>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<GameplayScoreHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LevelFinishedHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameplayHudPresenter>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)

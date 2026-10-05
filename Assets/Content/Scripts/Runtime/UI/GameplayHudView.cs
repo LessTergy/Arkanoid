@@ -10,9 +10,11 @@ namespace Arkanoid.UI
         [Header("Text")]
         [SerializeField] private TMP_Text _livesText;
         [SerializeField] private TMP_Text _scoreText;
+        [SerializeField] private TMP_Text _comboText;
         [SerializeField] private TMP_Text _pauseButtonText;
         [SerializeField] private string _livesFormat = "Lives: {0}";
         [SerializeField] private string _scoreFormat = "Score: {0}";
+        [SerializeField] private string _comboFormat = "Combo: {0}";
         [SerializeField] private string _pauseLabel = "Pause";
         [SerializeField] private string _resumeLabel = "Resume";
 
@@ -43,6 +45,11 @@ namespace Arkanoid.UI
         public void SetScore(int score)
         {
             _scoreText.text = string.Format(_scoreFormat, score);
+        }
+
+        public void SetCombo(int count)
+        {
+            _comboText.text = string.Format(_comboFormat, count);
         }
 
         public void SetRestartEnabled(bool value)

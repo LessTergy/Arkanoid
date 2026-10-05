@@ -4,11 +4,12 @@
 
 ## Текущий статус
 
-- Текущий этап: [Этап 3 — первый playable slice](Stages/03-playable-slice.md)
+- Текущий этап: [Этап 5 — расчёт счёта](Stages/05-score-decorator.md). `P5.9` подтверждена пользователем. `P5.10`: добавлены сквозные тесты счёта после потери жизни и отрицательного входа; ожидается результат PlayMode-проверки в Unity.
 - Этап 0 завершён: 15 из 15 задач, Gate 0 пройден.
 - Этап 1 завершён: 8 из 8 задач, Gate 1 пройден.
 - Этап 2 завершён: 10 из 10 задач, Gate 2 пройден.
-- Задачи этапа 3 выполнены; перед Gate 3 выполняется [план рефакторинга](Stages/03-refactoring.md). Следующая задача: `R3.1`.
+- Этап 3 и [рефакторинг перед Gate 3](Stages/03-refactoring.md) завершены; Gate 3 пройден.
+- Этап 4 завершён: 8 из 8 задач, Gate 4 пройден.
 - Источник истины для отметок выполнения — файл соответствующего этапа. Таблица ниже показывает только состояние этапа целиком.
 
 ## Общие документы
@@ -24,9 +25,9 @@
 | [0](Stages/00-foundation.md) | Требования и основание проекта | Завершён |
 | [1](Stages/01-paddle.md) | Изолированная механика платформы | Завершён |
 | [2](Stages/02-ball.md) | Изолированная механика мяча | Завершён |
-| [3](Stages/03-playable-slice.md) | Простые блоки и playable slice; [рефакторинг перед Gate 3](Stages/03-refactoring.md) | В работе |
-| [4](Stages/04-vcontainer.md) | Композиция через VContainer | Не начат |
-| [5](Stages/05-score-decorator.md) | Счёт через Decorator | Не начат |
+| [3](Stages/03-playable-slice.md) | Простые блоки и playable slice; [рефакторинг перед Gate 3](Stages/03-refactoring.md) | Завершён |
+| [4](Stages/04-vcontainer.md) | Композиция через VContainer | Завершён |
+| [5](Stages/05-score-decorator.md) | Счёт через Decorator | В работе |
 | [6](Stages/06-brick-hit-chain.md) | Brick hits через Chain of Responsibility | Не начат |
 | [7](Stages/07-bonus-drops.md) | Выпадение и подбор бонусов | Не начат |
 | [8](Stages/08-bonus-composite.md) | Составные бонусы через Composite | Не начат |

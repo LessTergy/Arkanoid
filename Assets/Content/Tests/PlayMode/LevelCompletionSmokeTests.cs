@@ -2,6 +2,7 @@ using System.Collections;
 using Arkanoid.Ball;
 using Arkanoid.Bricks;
 using Arkanoid.Core.GameFlow;
+using Arkanoid.Core.Score;
 using Arkanoid.GameFlow;
 using Arkanoid.Levels;
 using NUnit.Framework;
@@ -38,6 +39,8 @@ namespace Arkanoid.Tests.PlayMode
 
             Assert.IsNotNull(scope, "Gameplay was not loaded within 10 seconds.");
             var session = scope.Container.Resolve<GameSession>();
+            var score = scope.Container.Resolve<ScoreService>();
+            var combo = scope.Container.Resolve<ComboModel>();
             var level = Object.FindFirstObjectByType<LevelView>();
             var ball = Object.FindFirstObjectByType<BallController>();
             Assert.IsNotNull(level);
@@ -48,6 +51,26 @@ namespace Arkanoid.Tests.PlayMode
             Assert.AreEqual(bricks.Length, level.RemainingBricks);
             Assert.AreEqual(GameSessionState.Ready, session.State);
             Assert.AreEqual(BallState.Attached, ball.State);
+
+            var expectedTotal = 0;
+            var scoreEvents = 0;
+            var finishedTotal = -1;
+            var completedTotal = -1;
+            score.ScoreChanged += total =>
+            {
+                scoreEvents++;
+                Assert.That(score.Total, Is.EqualTo(total));
+                Assert.That(session.State, Is.EqualTo(GameSessionState.Playing),
+                    "Each award, including the last brick, must precede LevelComplete.");
+            };
+            level.Finished += () => finishedTotal = score.Total;
+            session.StateChanged += state =>
+            {
+                if (state == GameSessionState.LevelComplete)
+                {
+                    completedTotal = score.Total;
+                }
+            };
 
             InputSystem.QueueStateEvent(_keyboard, new KeyboardState(Key.Space));
             yield return null;
@@ -101,11 +124,17 @@ namespace Arkanoid.Tests.PlayMode
 
                 Assert.AreEqual(remainingBeforeHit - 1, level.RemainingBricks,
                     $"Brick {i + 1} did not register a ball collision within 2 seconds.");
+                expectedTotal += 100 * Mathf.Min(i + 1, 5);
+                Assert.That(score.Total, Is.EqualTo(expectedTotal));
+                Assert.That(combo.Count, Is.EqualTo(Mathf.Min(i + 1, 5)));
+                Assert.That(scoreEvents, Is.EqualTo(i + 1), "Each destruction must award exactly once.");
             }
 
             Assert.AreEqual(0, level.RemainingBricks);
             Assert.AreEqual(GameSessionState.LevelComplete, session.State);
             Assert.AreEqual(BallState.Stopped, ball.State);
+            Assert.That(finishedTotal, Is.EqualTo(expectedTotal));
+            Assert.That(completedTotal, Is.EqualTo(expectedTotal));
 
             InputSystem.QueueStateEvent(_keyboard, new KeyboardState());
             yield return null;

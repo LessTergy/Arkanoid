@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Arkanoid.Ball;
 using Arkanoid.Core.GameFlow;
+using Arkanoid.Core.Score;
 using Arkanoid.GameFlow;
 using Arkanoid.Paddle;
 using NUnit.Framework;
@@ -45,6 +46,9 @@ namespace Arkanoid.Tests.PlayMode
             Assert.IsNotNull(scope, "Gameplay was not loaded within 10 seconds.");
             var session = scope.Container.Resolve<GameSession>();
             var lives = scope.Container.Resolve<LivesModel>();
+            var score = scope.Container.Resolve<ScoreService>();
+            var combo = scope.Container.Resolve<ComboModel>();
+            score.AddScore(100);
             var ball = Object.FindFirstObjectByType<BallController>();
             var paddle = Object.FindFirstObjectByType<PaddleMovement>();
             var deathZone = Object.FindFirstObjectByType<DeathZone>();
@@ -66,12 +70,15 @@ namespace Arkanoid.Tests.PlayMode
             var stateChanges = new List<GameSessionState>();
             var lifeChanges = new List<int>();
             var livesAtLifeLost = new List<int>();
+            var totalBeforeLifeLost = score.Total;
             session.StateChanged += state =>
             {
                 stateChanges.Add(state);
                 if (state == GameSessionState.LifeLost)
                 {
                     livesAtLifeLost.Add(lives.RemainingLives);
+                    Assert.That(combo.Count, Is.EqualTo(0), "Combo must reset on LifeLost, including the last life.");
+                    Assert.That(score.Total, Is.EqualTo(totalBeforeLifeLost), "LifeLost must preserve the accumulated total.");
                 }
             };
             lives.LivesChanged += lifeChanges.Add;
@@ -109,6 +116,11 @@ namespace Arkanoid.Tests.PlayMode
                     $"Life {hit} was lost before the directed DeathZone entry.");
 
                 paddleBody.position = initialPaddlePosition + Vector2.right;
+                combo.Reset();
+                combo.Advance();
+                combo.Advance();
+                Assert.That(combo.Count, Is.EqualTo(2));
+                totalBeforeLifeLost = score.Total;
                 var zoneBounds = zoneCollider.bounds;
                 Assert.Greater(zoneBounds.size.x, 0f, "DeathZone collider has no bounds.");
                 Assert.Greater(zoneBounds.size.y, 0f, "DeathZone collider has no bounds.");
@@ -131,6 +143,8 @@ namespace Arkanoid.Tests.PlayMode
                 Assert.AreEqual(initialPaddlePosition.x, paddleBody.position.x, 0.001f);
                 Assert.AreEqual(initialPaddlePosition.y, paddleBody.position.y, 0.001f);
                 Assert.IsFalse(ballBody.simulated);
+                Assert.That(combo.Count, Is.EqualTo(0));
+                Assert.That(score.Total, Is.EqualTo(totalBeforeLifeLost));
 
                 if (hit < LivesModel.InitialLives)
                 {

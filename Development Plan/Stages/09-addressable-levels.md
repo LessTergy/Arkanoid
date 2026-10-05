@@ -15,7 +15,7 @@
 - [ ] `P9.7` Возвращать из loader явный lease/loaded-level object, владеющий operation handles. Не отдавать наружу «голый» asset без владельца.
 - [ ] `P9.8` При создании prefab из загруженного asset сохранять handle до уничтожения всех instances; не освобождать asset сразу после `Instantiate`.
 - [ ] `P9.9` Связать загрузку UniTask с cancellation token gameplay/level scope. Обработать cancel отдельно от реальной ошибки.
-- [ ] `P9.10` При смене уровня: остановить gameplay → уничтожить level instances/scope → освободить handles → загрузить следующий level → начать `Ready`.
+- [ ] `P9.10` При смене уровня: остановить gameplay → уничтожить level instances/scope → освободить handles → загрузить следующий level → начать `Ready`. Сохранить total `ScoreService` на время всей партии при смене уровня; не выполнять полный restart между уровнями.
 - [ ] `P9.11` Добавить loading overlay и error state с `Retry`/`Back to Menu`; не скрывать исключение пустым catch.
 - [ ] `P9.12` Создать 3 уровня с растущей сложностью и гарантированно разрушаемым layout.
 - [ ] `P9.13` Выполнить Addressables content build и player build из чистого состояния.

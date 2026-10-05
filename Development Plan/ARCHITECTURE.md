@@ -79,8 +79,10 @@ Unity input/physics/UI ──> Runtime adapters ──> Core rules
 ## VContainer scopes
 
 - `AppLifetimeScope` создаётся из project root prefab через `VContainerSettings` и переживает смену сцен. Он регистрирует долгоживущую инфраструктуру: navigation, level catalog/loader, audio service и фабрику уровня. `SceneNavigator` создаётся из отдельного prefab; ссылки на сцены задаются через `SceneReference` в Inspector.
-- `GameplayLifetimeScope` создаёт session-scoped сервисы: `GameSession`, `ScoreService`, `BonusService`, gameplay presenters/controllers.
+- `GameplayLifetimeScope` владеет сервисами партии: `GameSession`, `ScoreService`, будущий `BonusService`, gameplay presenters/controllers. Для счёта `ScoreService`, `ComboModel` и цепочка калькуляторов зарегистрированы как `Lifetime.Singleton` внутри gameplay scope: все его дочерние scopes используют одни экземпляры. `Lifetime.Scoped` создавал бы отдельные экземпляры в каждом дочернем scope. Полный restart создаёт новый gameplay scope и исходное состояние счёта; сохранение gameplay scope при смене уровня уточняется в этапе 9. Остальные текущие регистрации остаются `Scoped`; их перенос при загрузке уровней также рассматривается в этапе 9.
 - Уровень получает отдельный дочерний scope или явный `LevelContext`, который уничтожается при смене уровня.
+- В текущем gameplay `LevelView.BrickDestroyed` сообщает об уникальном уничтожении перед `Finished`. `GameplayScoreHandler` повышает комбо и начисляет очки через `ScoreService` только в `Playing`, сбрасывает комбо при `LifeLost`. Временные `100` для `Basic` находятся в обработчике до появления `BrickDefinition` в этапе 6. `BrickView` не зависит от счёта и UI.
+- `GameplayHudPresenter` читает текущие `ScoreService.Total` и `ComboModel.Count` при старте и обновляет HUD через `ScoreChanged` и `ComboChanged`; подписки снимаются в `Dispose`. `GameplayHudView` хранит подписи и отдельные ссылки TMP для score и combo. Сброс combo приходит из модели, без зависимости от порядка подписчиков игрового состояния.
 - Обычные C# entry points регистрируются через VContainer lifecycle interfaces только когда им действительно нужен Unity PlayerLoop.
 - Динамические prefab instances, которым требуется injection, создаются через фабрику на границе с `IObjectResolver`.
 
@@ -91,6 +93,8 @@ Unity input/physics/UI ──> Runtime adapters ──> Core rules
 | Decorator | Расчёт очков | Независимые `Combo` и `DoubleScore` оборачивают базовый расчёт, могут комбинироваться в явном порядке и тестироваться отдельно. |
 | Chain of Responsibility | Обработка попадания в блок | `Indestructible → Shield → Damage` последовательно рассматривают один запрос и могут остановить его до изменения health. |
 | Composite | Составные бонусы | Одиночный эффект и группа эффектов имеют один контракт; `Rescue` и вложенный `Comeback` собираются из переиспользуемых leaf effects. |
+
+Для расчёта счёта [сравнение P5.4](Stages/05-score-decorator.md#сравнение-подходов-для-p54) показывает, что текущим двум множителям достаточно одной формулы; pipeline также позволяет изолировать правила. Decorator сохраняется с учётом обязательного паттерна в scope проекта и общего `IScoreCalculator` для каждого слоя, ценой двух дополнительных типов и обёрток. Его превосходство по скорости или стоимости сопровождения не установлено. Пользователь подтвердил проверку самих декораторов и их композиции в P5.5/P5.6; интеграция начисления с игровыми событиями проверяется отдельно в следующих задачах.
 
 Перед реализацией каждого паттерна:
 

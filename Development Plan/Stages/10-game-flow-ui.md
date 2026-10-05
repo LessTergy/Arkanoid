@@ -8,7 +8,7 @@
 
 - [ ] `P10.1` Реализовать state flow: `Boot → MainMenu → Loading → Ready → Playing → Paused/LifeLost → LevelComplete → Loading/RunComplete → MainMenu`.
 - [ ] `P10.2` Сделать Main Menu с запуском игры, пригодное для сенсорного управления.
-- [ ] `P10.3` Доработать HUD: score, lives, level, combo, активные modifiers.
+- [ ] `P10.3` Доработать существующий HUD со score, lives и combo: добавить level и активные modifiers, привести оформление к полному игровому flow.
 - [ ] `P10.4` Сделать overlays: Ready/Launch, Pause, Level Complete, Game Over, Victory, Loading Error.
 - [ ] `P10.5` Настроить масштабирование UI от референса `1080 × 1920`, сенсорное управление, безопасные отступы для вырезов экрана и доступные размеры интерактивных элементов; сохранить keyboard/gamepad navigation для Editor.
 - [ ] `P10.6` Гарантировать, что UI только отображает state и отправляет commands, но не определяет правила победы/поражения.

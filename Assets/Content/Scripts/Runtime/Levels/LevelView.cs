@@ -10,6 +10,7 @@ namespace Arkanoid.Levels
         private readonly HashSet<BrickView> _remainingBricks = new();
 
         public int RemainingBricks => _remainingBricks.Count;
+        public event Action<BrickView> BrickDestroyed;
         public event Action Finished;
 
         private void Awake()
@@ -35,6 +36,7 @@ namespace Arkanoid.Levels
             }
 
             brick.Destroyed -= OnBrickDestroyed;
+            BrickDestroyed?.Invoke(brick);
 
             if (_remainingBricks.Count == 0)
             {

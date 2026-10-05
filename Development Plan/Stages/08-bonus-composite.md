@@ -14,7 +14,7 @@
 - [ ] `P8.6` Создать serializable definitions и `BonusEffectFactory`, собирающую runtime effects без передачи container внутрь effect.
 - [ ] `P8.7` Создать составной бонус `Rescue`: `ExpandPaddle + AddLife`. Ограничить жизни заданным maximum.
 - [ ] `P8.8` Создать вложенный составной бонус `Comeback`: `Rescue + EnableDoubleScore`, чтобы в реальном контенте проверить рекурсивную композицию.
-- [ ] `P8.9` Создать одиночный бонус `DoubleScore`, действующий до потери жизни; связать его с Decorator-механизмом расчёта счёта из этапа 5.
+- [ ] `P8.9` Создать одиночный бонус `DoubleScore`, действующий до потери жизни; включать подготовленный в этапе 5 `DoubleScoreDecorator` через состояние эффекта и сбрасывать его при `LifeLost`.
 - [ ] `P8.10` Определить политику повторного подбора: базовый scope — refresh/no stack для размера и double score.
 - [ ] `P8.11` Добавить тесты: leaf, composite и nested composite применяют каждый effect один раз и в ожидаемом порядке; maximum lives и reset on life lost соблюдаются.
 - [ ] `P8.12` Кратко записать в README, почему Composite выбран и какую проблему решает общий контракт leaf/group.

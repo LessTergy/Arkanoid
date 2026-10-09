@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Arkanoid.Bricks;
+using Arkanoid.Core.Bricks;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.Core.Score;
 using Arkanoid.GameFlow;
 using Arkanoid.Input;
+using Arkanoid.Levels;
 using DG.Tweening;
 using NUnit.Framework;
 using UnityEngine;
@@ -21,6 +24,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator Bootstrap_NavigatesToGameplayWithScopedServicesAndPackages()
         {
+            Time.timeScale = 1f;
             var bootstrapPath = SceneUtility.GetScenePathByBuildIndex(0);
             Assert.IsNotEmpty(bootstrapPath, "Bootstrap must be the first enabled scene in Build Settings.");
 
@@ -67,6 +71,33 @@ namespace Arkanoid.Tests.PlayMode
             Assert.That(combo.Count, Is.EqualTo(0));
             Assert.That(doubleScore.IsEnabled, Is.False);
             Assert.That(gameplayScope.Container.Resolve<IScoreCalculator>(), Is.SameAs(doubleScore));
+
+            var level = gameplayScope.Container.Resolve<LevelView>();
+            var bricks = level.GetComponentsInChildren<BrickView>();
+            var originalStates = new List<BrickState>();
+            BrickView damageTarget = null;
+            foreach (var brick in bricks)
+            {
+                originalStates.Add(brick.State);
+                if (damageTarget == null && !brick.State.Settings.IsIndestructible
+                    && (brick.State.CurrentHealth > 1 || brick.State.CurrentShieldCharges > 0))
+                {
+                    damageTarget = brick;
+                }
+            }
+
+            Assert.That(damageTarget, Is.Not.Null, "Include a durable or shielded brick to test restart restoration.");
+            var originalRemaining = level.RemainingBricks;
+            var damagedState = damageTarget.State;
+            var expectedOutcome = damagedState.CurrentShieldCharges > 0
+                ? (damagedState.CurrentShieldCharges == 1 ? BrickHitOutcome.ShieldBroken : BrickHitOutcome.ShieldAbsorbed)
+                : BrickHitOutcome.Damaged;
+            Assert.That(damageTarget.Hit().Outcome, Is.EqualTo(expectedOutcome));
+            var damagedHealth = damagedState.CurrentHealth;
+            var damagedShields = damagedState.CurrentShieldCharges;
+            Assert.That(level.RemainingBricks, Is.EqualTo(originalRemaining));
+            Assert.That(scoreService.Total, Is.Zero);
+            Assert.That(combo.Count, Is.Zero);
 
             combo.Advance();
             combo.Advance();
@@ -131,6 +162,27 @@ namespace Arkanoid.Tests.PlayMode
             Assert.That(restartedCombo.Count, Is.EqualTo(0));
             Assert.That(restartedDouble, Is.Not.SameAs(doubleScore));
             Assert.That(restartedDouble.IsEnabled, Is.False);
+
+            var restartedLevel = restartedScope.Container.Resolve<LevelView>();
+            var restartedBricks = restartedLevel.GetComponentsInChildren<BrickView>();
+            Assert.That(restartedLevel.RemainingBricks, Is.EqualTo(originalRemaining));
+            Assert.That(restartedBricks.Length, Is.EqualTo(originalStates.Count));
+            for (var index = 0; index < restartedBricks.Length; index++)
+            {
+                var original = originalStates[index];
+                var restored = restartedBricks[index].State;
+                Assert.That(originalStates, Has.No.Member(restored), "Restart must create new block states.");
+                Assert.That(restored.Settings.BaseScore, Is.EqualTo(original.Settings.BaseScore));
+                Assert.That(restored.Settings.MaxHealth, Is.EqualTo(original.Settings.MaxHealth));
+                Assert.That(restored.Settings.ShieldCharges, Is.EqualTo(original.Settings.ShieldCharges));
+                Assert.That(restored.Settings.IsIndestructible, Is.EqualTo(original.Settings.IsIndestructible));
+                Assert.That(restored.CurrentHealth, Is.EqualTo(restored.Settings.MaxHealth));
+                Assert.That(restored.CurrentShieldCharges, Is.EqualTo(restored.Settings.ShieldCharges));
+                Assert.That(restored.IsDestroyed, Is.False);
+            }
+
+            Assert.That(damagedState.CurrentHealth, Is.EqualTo(damagedHealth));
+            Assert.That(damagedState.CurrentShieldCharges, Is.EqualTo(damagedShields));
 
             yield return SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
             Assert.IsTrue(restartedScope == null, "GameplayLifetimeScope survived scene unload.");

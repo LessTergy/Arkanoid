@@ -1,5 +1,6 @@
 using Arkanoid.Ball;
 using Arkanoid.Composition;
+using Arkanoid.Core.Bricks;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.Core.Score;
 using Arkanoid.GameFlow;
@@ -48,8 +49,10 @@ namespace Arkanoid
             builder.RegisterComponent(_hudView);
             builder.Register<GameSession>(Lifetime.Scoped);
             builder.Register<LivesModel>(Lifetime.Scoped);
+            builder.Register(_ => new BrickHitProcessor(
+                new IndestructibleHitHandler(new ShieldHitHandler(new DamageHitHandler()))), Lifetime.Singleton);
             builder.Register<ComboModel>(Lifetime.Singleton);
-            builder.Register<DoubleScoreDecorator>(resolver =>
+            builder.Register(resolver =>
                 {
                     var baseScore = new BaseScoreCalculator();
                     var comboScore = new ComboScoreDecorator(baseScore, resolver.Resolve<ComboModel>());

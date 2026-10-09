@@ -9,8 +9,6 @@ namespace Arkanoid.GameFlow
 {
     internal sealed class GameplayScoreHandler : IStartable, IDisposable
     {
-        private const int BasicBaseScore = 100;
-
         private readonly LevelView _levelView;
         private readonly GameSession _gameSession;
         private readonly ComboModel _comboModel;
@@ -47,13 +45,8 @@ namespace Arkanoid.GameFlow
                 return;
             }
 
-            if (brick.TypeId != BrickTypeId.Basic)
-            {
-                throw new ArgumentOutOfRangeException(nameof(brick), brick.TypeId, "Unsupported brick type.");
-            }
-
             _comboModel.Advance();
-            _scoreService.AddScore(BasicBaseScore);
+            _scoreService.AddScore(brick.State.Settings.BaseScore);
         }
 
         private void OnGameSessionStateChanged(GameSessionState state)

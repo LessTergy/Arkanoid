@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Arkanoid.Bricks;
+using Arkanoid.Core.Bricks;
 using UnityEngine;
+using VContainer;
 
 namespace Arkanoid.Levels
 {
@@ -13,18 +15,29 @@ namespace Arkanoid.Levels
         public event Action<BrickView> BrickDestroyed;
         public event Action Finished;
 
-        private void Awake()
+        [Inject]
+        public void Construct(BrickHitProcessor hitProcessor)
         {
             var bricks = GetComponentsInChildren<BrickView>();
             foreach (var brick in bricks)
             {
+                brick.Initialize(hitProcessor);
+            }
+
+            foreach (var brick in bricks)
+            {
+                if (brick.State.Settings.IsIndestructible)
+                {
+                    continue;
+                }
+
                 _remainingBricks.Add(brick);
                 brick.Destroyed += OnBrickDestroyed;
             }
 
             if (_remainingBricks.Count == 0)
             {
-                throw new InvalidOperationException("A level must contain at least one active BrickView.");
+                throw new InvalidOperationException("A level must contain at least one active destructible BrickView.");
             }
         }
 

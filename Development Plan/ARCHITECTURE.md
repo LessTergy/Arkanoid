@@ -12,11 +12,15 @@ Assets/Content/
 │   ├── Ball/
 │   ├── Bricks/
 │   ├── Bonuses/
+│   │   ├── Definitions/
+│   │   ├── Effects/
+│   │   └── BonusDropDefinition.asset
 │   └── Levels/
 ├── Input/
 ├── Materials/
 ├── Prefabs/
 │   ├── Gameplay/
+│   │   └── Bonuses/
 │   └── UI/
 ├── Scenes/
 │   ├── Bootstrap.unity
@@ -79,7 +83,7 @@ Unity input/physics/UI ──> Runtime adapters ──> Core rules
 ## VContainer scopes
 
 - `AppLifetimeScope` создаётся из project root prefab через `VContainerSettings` и переживает смену сцен. Он регистрирует долгоживущую инфраструктуру: navigation, level catalog/loader, audio service и фабрику уровня. `SceneNavigator` создаётся из отдельного prefab; ссылки на сцены задаются через `SceneReference` в Inspector.
-- `GameplayLifetimeScope` владеет сервисами партии: `GameSession`, `ScoreService`, будущий `BonusService`, gameplay presenters/controllers. Для счёта `ScoreService`, `ComboModel` и цепочка калькуляторов зарегистрированы как `Lifetime.Singleton` внутри gameplay scope: все его дочерние scopes используют одни экземпляры. `Lifetime.Scoped` создавал бы отдельные экземпляры в каждом дочернем scope. Полный restart создаёт новый gameplay scope и исходное состояние счёта; сохранение gameplay scope при смене уровня уточняется в этапе 9. Остальные текущие регистрации остаются `Scoped`; их перенос при загрузке уровней также рассматривается в этапе 9.
+- `GameplayLifetimeScope` владеет сервисами партии: `GameSession`, `LivesModel`, `ScoreService`, gameplay presenters/controllers. Для счёта `ScoreService`, `ComboModel` и цепочка калькуляторов зарегистрированы как `Lifetime.Singleton` внутри gameplay scope: все его дочерние scopes используют одни экземпляры. `Lifetime.Scoped` создавал бы отдельные экземпляры в каждом дочернем scope. Полный restart создаёт новый gameplay scope и исходное состояние счёта; сохранение gameplay scope при смене уровня уточняется в этапе 9. Остальные текущие регистрации остаются `Scoped`; их перенос при загрузке уровней также рассматривается в этапе 9. Stage 8 расширяет существующий `GameplayBonusHandler`; отдельный `BonusService` без самостоятельной ответственности не требуется.
 - Уровень получает отдельный дочерний scope или явный `LevelContext`, который уничтожается при смене уровня.
 - В текущем gameplay `LevelView.BrickDestroyed` сообщает об уникальном уничтожении перед `Finished`. `GameplayScoreHandler` повышает комбо и начисляет очки через `ScoreService` только в `Playing`, сбрасывает комбо при `LifeLost`. Base score берётся из проверенных `BrickState.Settings`, без константы и проверки `Basic`. `BrickView` не зависит от счёта и UI.
 - `GameplayHudPresenter` читает текущие `ScoreService.Total` и `ComboModel.Count` при старте и обновляет HUD через `ScoreChanged` и `ComboChanged`; подписки снимаются в `Dispose`. `GameplayHudView` хранит подписи и отдельные ссылки TMP для score и combo. Сброс combo приходит из модели, без зависимости от порядка подписчиков игрового состояния.
@@ -112,13 +116,29 @@ Unity input/physics/UI ──> Runtime adapters ──> Core rules
 
 ## Обязательные паттерны и критерии их уместности
 
+### Решение Stage 8 — код и контент подготовлены, приёмка ожидается
+
+Подробные контракты находятся в [Stage 8](Stages/08-bonus-composite.md), общая настройка/приёмка — в [чек-листе](Stages/08-bonus-checklist.md). Пользователь согласовал 2026-10-10 стартовые 3 жизни, максимум 5, AddLife +1 и исключение `AddScoreEffect`. Все задачи этапа подготовлены в коде/контенте и проверены статически; Unity пользователь проверит общей порцией. `LivesModel.TryAddLife()` владеет пределом и событием изменения жизней, не воскрешает модель с 0 жизней; `DoubleScoreDecorator.IsEnabled` остаётся единственным состоянием удвоения. Подбор не начисляет очки и не повышает combo.
+
+`IBonusEffect.Apply(BonusContext)`, leaf effects и `CompositeBonusEffect` размещаются в Core как обычные C#-типы. Контекст передаёт `LivesModel`, уже собранный `DoubleScoreDecorator` и узкую операцию расширения платформы через `Action`; Unity-ссылок и контейнера в Core нет. Операция использует существующий `PaddleMovement.SetWidth` с `PaddleConfig.Width × 1.5`. Группа применяет дочерние эффекты по порядку, включая вложенную группу, без отдельного контракта или списка в pickup view. Общий `Reset` у каждого эффекта не нужен: одноразовое добавление жизни не откатывается.
+
+`BonusFactory.Create` принимает выбранную BonusDefinition, проверяет effect/prefab до DI Instantiate и связывает clone с IBonusEffect до первого physics tick. Pickup отклоняет null/reinitialization; handler вызывает Apply без ветвления по типу. Актуальный контент с 2026-10-11: ExpandPaddleBonus → ExpandPaddleEffect/BonusPickup, AddLifeBonus → AddLifeEffect/AddLifePickup, DoubleScoreBonus → EnableDoubleScoreEffect/DoubleScorePickup. AddLifePickup и DoubleScorePickup — зелёный/оранжевый variants исходного prefab. Rescue заменён одиночным AddLife с сохранением GUID definition/prefab; Comeback и оба группирующих effect assets удалены. После правки импорт и назначения ещё требуют проверки пользователя.
+
+`BonusEffectFactory` проверяет ссылки, типы, пустые группы и циклы по текущему пути обхода; общие assets в разных ветвях разрешены. Затем собирает runtime-снимок без применения effects. Различение типов definitions находится только на этой границе сборки. Definitions не хранят состояние партии, не получают DI и не изменяются при подборе. Проверка исходного prefab выполняется до Instantiate; injection не требует activeSelf во время временной деактивации VContainer. Временная регистрация общего ExpandPaddle в DI удалена: эффект определяется выбранной definition.
+
+В P8.13 drop-профиль переведён на общий Chance и упорядоченные Entries `BonusDefinition + Weight`. CreateSettings проверяет все записи, эффекты и prefabs до random, даже при Chance=0. Core получает immutable числовой снимок; TrySelect сначала проверяет шанс, затем возвращает индекс. Веса конечны и строго положительны, сумма double; один вариант не требует selection random, несколько — одну выборку после успеха. Точная внутренняя граница выбирает следующую запись; roll=1 — последнюю. Профиль мигрирован без смены GUID. На 2026-10-11 текущая настройка пользователя сохранена: DoubleScoreBonus, Weight=1, Chance=1; три уникальных варианта можно включить после проверки. Старое поле одного prefab удалено; немигрированный профиль явно отклоняется, скрытого fallback нет.
+
+`GameplayBonusHandler` сохраняет владение pickups и подписками, применяет собранный `IBonusEffect` и на `LifeLost`, `LevelComplete`, `GameOver` очищает pickups, возвращает базовую ширину и выключает double. Счёт и добавленные жизни не откатываются; combo по-прежнему сбрасывает `GameplayScoreHandler` только на `LifeLost`. При уничтожении scope не вызывается сброс уничтожаемой платформы; restart создаёт исходное состояние. Адресуемая загрузка и перенос lifetime при смене уровня остаются Stage 9.
+
+Composite первоначально обслуживал вложенные группирующие бонусы. Пользователь отменил их игровой контент 2026-10-11. Core/Runtime-механизм и технические тесты сохранены как уже реализованный обязательный паттерн проекта; в сохранённых definitions сейчас только независимые эффекты. Уместное применение Composite для итоговой демонстрации остаётся открытым вопросом, новые механики в этой правке не добавлены.
+
 Валидация Stage 7 учитывает порядок VContainer 1.19: `Instantiate` временно деактивирует prefab и clone, выполняет injection, затем возвращает исходную активность. Требование активного исходного prefab проверяется в `BonusDropDefinition.CreateSettings()` до random. Definition хранит `BonusPickup`, фабрика принимает и создаёт этот компонент через типизированный `Instantiate`. `BonusPickup` использует вручную назначенные сериализуемые `_rigidbody` и `_collider`, без `GetComponent` и Awake. `Construct()` проверяет наличие ссылок, принадлежность тому же объекту и физические параметры, не требуя activeSelf во время injection. Неактивный prefab остаётся ошибкой данных. После смены типа ссылки пользователь завершил настройку Pickup Prefab и Rigidbody/Collider, затем подтвердил тесты и работу геймплея; Gate 7 пройден 2026-10-10.
 
 | Паттерн | Механика | Решаемая проблема |
 |---|---|---|
 | Decorator | Расчёт очков | Независимые `Combo` и `DoubleScore` оборачивают базовый расчёт, могут комбинироваться в явном порядке и тестироваться отдельно. |
 | Chain of Responsibility | Обработка попадания в блок | `Indestructible → Shield → Damage` последовательно рассматривают один запрос и могут остановить его до изменения health. |
-| Composite | Составные бонусы | Одиночный эффект и группа эффектов имеют один контракт; `Rescue` и вложенный `Comeback` собираются из переиспользуемых leaf effects. |
+| Composite | Технический механизм групп эффектов | Реализация и тесты общего leaf/group-контракта сохранены. Группирующие игровые бонусы отменены; применение для итоговой демонстрации пока не определено. |
 
 Для расчёта счёта [сравнение P5.4](Stages/05-score-decorator.md#сравнение-подходов-для-p54) показывает, что двум текущим множителям достаточно одной формулы. Decorator даёт общий `IScoreCalculator` каждому слою ценой дополнительных типов и вложенных вызовов. Темп роста серии принадлежит `ComboModel`; изменение этого темпа не требует нового score decorator. Дополнительные обёртки должны реализовывать согласованные правила начисления. Превосходство паттерна по скорости или объёму кода не установлено.
 

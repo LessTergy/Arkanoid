@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e5c339815c995f3c7c85332af78014b, type: 3}
+  m_Name: AddLifeBonus
+  m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Bonus.BonusDefinition
+  _effect: {fileID: 11400000, guid: 895d3e794f3c177a37e422cfa61c044b, type: 2}
+  _pickupPrefab: {fileID: 4126877980597054218, guid: 57973cc438b262d4f8f1572edcf7e519, type: 3}

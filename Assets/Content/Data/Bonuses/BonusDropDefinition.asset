@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a92d55609e54d6ba98c3b5acc829897, type: 3}
   m_Name: BonusDropDefinition
   m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Bonus.BonusDropDefinition
-  _chance: 0.25
-  _pickupPrefab: {fileID: 5157935038324154830, guid: 696baee33824cd64e86b273da8b6be00, type: 3}
+  _chance: 1
+  _entries:
+  - _bonus: {fileID: 11400000, guid: 4ca5c41554904f98959f6b622b67d67d, type: 2}
+    _weight: 1

@@ -1,4 +1,5 @@
 using System;
+using Arkanoid.Core.Bonus;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.GameFlow;
 using Arkanoid.Paddle;
@@ -20,8 +21,20 @@ namespace Arkanoid.Bonus
         private GameplayPauseController _pause;
         private bool _removed;
 
+        internal IBonusEffect Effect { get; private set; }
+
         public event Action<BonusPickup> Collected;
         public event Action<BonusPickup> Removed;
+
+        internal void InitializeEffect(IBonusEffect effect)
+        {
+            if (Effect != null)
+            {
+                throw new InvalidOperationException("BonusPickup effect has already been initialized.");
+            }
+
+            Effect = effect ?? throw new ArgumentNullException(nameof(effect));
+        }
 
         [Inject]
         internal void Construct(
@@ -35,6 +48,16 @@ namespace Arkanoid.Bonus
             _deathZone = deathZone;
             _session = session;
             _pause = pause;
+        }
+
+        internal void ValidatePrefabConfiguration()
+        {
+            if (!gameObject.activeSelf)
+            {
+                throw new InvalidOperationException($"BonusPickup prefab '{name}' must be active.");
+            }
+
+            ValidateConfiguration();
         }
 
         internal void ValidateConfiguration()

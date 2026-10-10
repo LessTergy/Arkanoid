@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Arkanoid.Core.Bonus;
 using UnityEngine;
 
@@ -8,24 +9,34 @@ namespace Arkanoid.Bonus
     public sealed class BonusDropDefinition : ScriptableObject
     {
         [SerializeField, Range(0f, 1f)] private float _chance = 0.25f;
-        [SerializeField] private BonusPickup _pickupPrefab;
+        [SerializeField] private List<BonusDropEntry> _entries = new();
 
-        public BonusPickup PickupPrefab => _pickupPrefab;
+        public IReadOnlyList<BonusDropEntry> Entries => _entries;
 
         public BonusDropSettings CreateSettings()
         {
-            var settings = new BonusDropSettings(_chance);
-            if (_pickupPrefab == null)
+            if (_entries == null || _entries.Count == 0)
             {
-                throw new InvalidOperationException($"Bonus drop definition '{name}' requires a pickup prefab.");
+                throw new InvalidOperationException($"Bonus drop definition '{name}' requires a nonempty drop table.");
             }
 
-            if (!_pickupPrefab.gameObject.activeSelf)
+            var weights = new float[_entries.Count];
+            for (var i = 0; i < weights.Length; i++)
             {
-                throw new InvalidOperationException($"Bonus drop definition '{name}' requires an active pickup prefab.");
+                if (_entries[i] == null || _entries[i].Bonus == null)
+                {
+                    throw new InvalidOperationException($"Bonus drop definition '{name}' has an unassigned entry at {i}.");
+                }
+
+                weights[i] = _entries[i].Weight;
             }
 
-            _pickupPrefab.ValidateConfiguration();
+            var settings = new BonusDropSettings(_chance, weights);
+            var effectFactory = new BonusEffectFactory();
+            foreach (var entry in _entries)
+            {
+                effectFactory.Create(entry.Bonus);
+            }
 
             return settings;
         }

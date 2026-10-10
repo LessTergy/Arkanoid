@@ -5,6 +5,7 @@ using Arkanoid.Core.Bonus;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.GameFlow;
 using Arkanoid.Levels;
+using Arkanoid.Paddle;
 using VContainer.Unity;
 
 namespace Arkanoid.Bonus
@@ -16,7 +17,9 @@ namespace Arkanoid.Bonus
         private readonly GameplayPauseController _pause;
         private readonly BonusDropService _dropService;
         private readonly BonusFactory _factory;
-        private readonly ExpandPaddleEffect _expandPaddle;
+        private readonly BonusContext _context;
+        private readonly PaddleMovement _paddle;
+        private readonly PaddleConfig _paddleConfig;
         private readonly HashSet<BonusPickup> _pickups = new();
 
         public GameplayBonusHandler(
@@ -25,14 +28,18 @@ namespace Arkanoid.Bonus
             GameplayPauseController pause,
             BonusDropService dropService,
             BonusFactory factory,
-            ExpandPaddleEffect expandPaddle)
+            BonusContext context,
+            PaddleMovement paddle,
+            PaddleConfig paddleConfig)
         {
             _level = level;
             _session = session;
             _pause = pause;
             _dropService = dropService;
             _factory = factory;
-            _expandPaddle = expandPaddle;
+            _context = context;
+            _paddle = paddle;
+            _paddleConfig = paddleConfig;
         }
 
         public void Start()
@@ -69,7 +76,8 @@ namespace Arkanoid.Bonus
                 || state == GameSessionState.GameOver)
             {
                 ClearPickups();
-                _expandPaddle.Reset();
+                _context.DoubleScore.IsEnabled = false;
+                _paddle.SetWidth(_paddleConfig.Width);
             }
         }
 
@@ -81,12 +89,12 @@ namespace Arkanoid.Bonus
             }
 
             var profile = brick.BonusDrop;
-            if (profile == null || !_dropService.ShouldDrop(profile.CreateSettings()))
+            if (profile == null || !_dropService.TrySelect(profile.CreateSettings(), out var index))
             {
                 return;
             }
 
-            var pickup = _factory.Create(profile.PickupPrefab, brick.transform.position);
+            var pickup = _factory.Create(profile.Entries[index].Bonus, brick.transform.position);
             _pickups.Add(pickup);
             pickup.Collected += OnPickupCollected;
             pickup.Removed += OnPickupRemoved;
@@ -94,7 +102,7 @@ namespace Arkanoid.Bonus
 
         private void OnPickupCollected(BonusPickup pickup)
         {
-            _expandPaddle.Apply();
+            pickup.Effect.Apply(_context);
         }
 
         private void OnPickupRemoved(BonusPickup pickup)

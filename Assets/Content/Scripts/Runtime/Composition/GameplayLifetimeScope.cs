@@ -1,5 +1,7 @@
 using Arkanoid.Ball;
+using Arkanoid.Bonus;
 using Arkanoid.Composition;
+using Arkanoid.Core.Bonus;
 using Arkanoid.Core.Bricks;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.Core.Score;
@@ -61,10 +63,15 @@ namespace Arkanoid
                 .AsSelf()
                 .As<IScoreCalculator>();
             builder.Register<ScoreService>(Lifetime.Singleton);
+            builder.Register<UnityRandomProvider>(Lifetime.Scoped).As<IRandomProvider>();
+            builder.Register<BonusDropService>(Lifetime.Scoped);
+            builder.Register<BonusFactory>(Lifetime.Scoped);
+            builder.Register<ExpandPaddleEffect>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameplayPauseController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<LaunchHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LifeLossHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameplayScoreHandler>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<GameplayBonusHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LevelFinishedHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameplayHudPresenter>(Lifetime.Scoped);
             builder.Register<ScopeLifetimeProbe>(Lifetime.Scoped)

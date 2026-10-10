@@ -1,3 +1,5 @@
+using Arkanoid.Bonus;
+using Arkanoid.Core.Bonus;
 using Arkanoid.Core.Bricks;
 using UnityEngine;
 
@@ -12,20 +14,26 @@ namespace Arkanoid.Bricks
         [SerializeField, Min(0)] private int _shieldCharges;
         [SerializeField] private bool _isIndestructible;
 
+        [Header("Bonus Drop")]
+        [SerializeField] private BonusDropDefinition _bonusDrop;
+
         [Header("Presentation")]
         [SerializeField] private Color _color = Color.white;
 
-        public Color Color
-        {
-            get
-            {
-                return _color;
-            }
-        }
+        public Color Color => _color;
+
+        public BonusDropDefinition BonusDrop => _bonusDrop;
 
         public BrickSettings CreateSettings()
         {
-            return new BrickSettings(_baseScore, _maxHealth, _shieldCharges, _isIndestructible);
+            var settings = new BrickSettings(_baseScore, _maxHealth, _shieldCharges, _isIndestructible);
+            CreateDropSettings();
+            return settings;
+        }
+
+        public BonusDropSettings CreateDropSettings()
+        {
+            return _bonusDrop == null ? null : _bonusDrop.CreateSettings();
         }
     }
 }

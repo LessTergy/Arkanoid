@@ -1,5 +1,6 @@
 using System;
 using Arkanoid.Ball;
+using Arkanoid.Bonus;
 using Arkanoid.Core.Bricks;
 using TMPro;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace Arkanoid.Bricks
         [SerializeField] private TMP_Text _stateLabel;
 
         public BrickState State { get; private set; }
+
+        public BonusDropDefinition BonusDrop => _definition.BonusDrop;
 
         public event Action<BrickView> Destroyed;
 

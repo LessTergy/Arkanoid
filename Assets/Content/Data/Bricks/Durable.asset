@@ -16,4 +16,5 @@ MonoBehaviour:
   _maxHealth: 3
   _shieldCharges: 0
   _isIndestructible: 0
+  _bonusDrop: {fileID: 11400000, guid: be74f4ccb885bbf4487ab587a7d316ce, type: 2}
   _color: {r: 1, g: 0.67, b: 0.25, a: 1}

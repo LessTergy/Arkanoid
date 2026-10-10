@@ -51,12 +51,19 @@ namespace Arkanoid.Paddle
         public void SetWidth(float width)
         {
             var scaleX = Mathf.Abs(transform.localScale.x);
-            if (width <= 0f)
+            var bounds = GetMovementBounds();
+            if (float.IsNaN(width) || float.IsInfinity(width) || width <= 0f || width > bounds.width)
             {
-                throw new ArgumentOutOfRangeException(nameof(width));
+                throw new ArgumentOutOfRangeException(nameof(width), width,
+                    "Paddle width must be finite, positive and fit inside the playfield.");
             }
 
             var localWidth = width / scaleX;
+            if (scaleX == 0f || float.IsInfinity(scaleX) || float.IsNaN(localWidth) || float.IsInfinity(localWidth))
+            {
+                throw new InvalidOperationException("Paddle X scale must allow a finite local width.");
+            }
+
             var spriteSize = _spriteRenderer.size;
             spriteSize.x = localWidth;
             _spriteRenderer.size = spriteSize;
@@ -64,6 +71,12 @@ namespace Arkanoid.Paddle
             var colliderSize = _boxCollider.size;
             colliderSize.x = localWidth;
             _boxCollider.size = colliderSize;
+
+            var position = _body.position;
+            var clampedX = PaddlePositionCalculator.CalculateNextX(position.x, default, 0f, 0f, width, bounds);
+            _body.position = new Vector2(clampedX, position.y);
+            var worldPosition = transform.position;
+            transform.position = new Vector3(clampedX, position.y, worldPosition.z);
         }
 
         public void ResetPosition()
@@ -75,19 +88,22 @@ namespace Arkanoid.Paddle
 
         private void FixedUpdate()
         {
-            var bounds = _playfieldCamera.WorldBounds;
-            var colliderCenterOffsetX = _boxCollider.offset.x * transform.localScale.x;
-            var originBounds = new Rect(
-                bounds.xMin - colliderCenterOffsetX, bounds.yMin, bounds.width, bounds.height);
             var position = _body.position;
             var move = _playerInput.Move;
             var nextX = PaddlePositionCalculator.CalculateNextX(
-                position.x, move, _config.Speed, Time.fixedDeltaTime, Width, originBounds);
+                position.x, move, _config.Speed, Time.fixedDeltaTime, Width, GetMovementBounds());
 
             if (!Mathf.Approximately(nextX, position.x))
             {
                 _body.MovePosition(new Vector2(nextX, position.y));
             }
+        }
+
+        private Rect GetMovementBounds()
+        {
+            var bounds = _playfieldCamera.WorldBounds;
+            var colliderCenterOffsetX = _boxCollider.offset.x * transform.localScale.x;
+            return new Rect(bounds.xMin - colliderCenterOffsetX, bounds.yMin, bounds.width, bounds.height);
         }
     }
 }

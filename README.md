@@ -2,7 +2,7 @@
 
 Классический 2D Arkanoid на Unity. Проект создаётся как законченное портфолио-приложение с понятной архитектурой, автоматическими тестами и обоснованным применением VContainer, Addressables, Decorator, Composite и Chain of Responsibility.
 
-Playable slice, композиция через VContainer, счёт, комбо и минимальный HUD завершены; Gate 5 пройден. В этапе 6 P6.1–P6.10 подтверждены пользователем. Смешанные сценовые тесты P6.11 готовы к запуску, обоснование паттерна P6.12 добавлено; Gate 6 открыт до результатов регрессии и player build. Подробный порядок работ и статус находятся в [Development Plan](<Development Plan/README.md>).
+Этапы 0–7 завершены, Gate 7 пройден. Реализованы playable slice, композиция через VContainer, счёт, комбо, HUD, параметрические блоки с цепочкой попаданий и выпадение/подбор ExpandPaddle. Пользователь подтвердил тесты, ручную регрессию и работу Android build на смартфоне 2026-10-10. Следующий этап — составные бонусы через Composite; реализация ещё не начата. Подробный порядок работ и статус находятся в [Development Plan](<Development Plan/README.md>).
 
 ## Требования
 
@@ -29,7 +29,7 @@ PlayMode-класс `GameplayScoreIntegrationTests` проверяет физи�
 
 Запустить также EditMode `BrickHitChainTests` и PlayMode `BrickHitIntegrationTests`. Цепочка `Indestructible → Shield → Damage` снимает один shield либо одно HP; последний shield полностью поглощает удар. Каждый блок хранит своё состояние, повтор после уничтожения не публикует событие повторно. LevelView инициализирует все активные блоки, но учитывает для победы только разрушаемые; очки читаются из проверенных settings. Подпись показывает оставшееся HP/щит, оболочка исчезает при последнем заряде. Indestructible остаётся после завершения уровня.
 
-`BrickHitIntegrationTests` создаёт временный смешанный уровень и проверяет визуальные данные, реальный score handler, валидацию definition до изменения score/combo, нулевой score и ошибку уровня без активных разрушаемых. Новые тесты P6.11 ещё требуют запуска в Unity. Ручной сценарий и player build — по [инструкции этапа 6](<Development Plan/Stages/06-brick-hit-chain.md>).
+`BrickHitIntegrationTests` создаёт временный смешанный уровень и проверяет визуальные данные, реальный score handler, валидацию definition до изменения score/combo, нулевой score и ошибку уровня без активных разрушаемых. Тесты, ручной сценарий и player build этапа 6 подтверждены пользователем; критерии находятся в [документе этапа](<Development Plan/Stages/06-brick-hit-chain.md>).
 
 ## Почему Chain of Responsibility
 

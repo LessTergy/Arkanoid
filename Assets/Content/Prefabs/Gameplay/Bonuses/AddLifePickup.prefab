@@ -67,5 +67,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8973373067083384420, guid: 696baee33824cd64e86b273da8b6be00, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9138145860033727101}
   m_SourcePrefab: {fileID: 100100000, guid: 696baee33824cd64e86b273da8b6be00, type: 3}
+--- !u!1 &9138145860033727100 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8973373067083384420, guid: 696baee33824cd64e86b273da8b6be00, type: 3}
+  m_PrefabInstance: {fileID: 9138145860033727172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9138145860033727101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9138145860033727100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e059dd58c21ab3316eb9a8f03a7f38, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Bonus.AddLifeEffect
+--- !u!114 &4126877980597054218 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5157935038324154830, guid: 696baee33824cd64e86b273da8b6be00, type: 3}
+  m_PrefabInstance: {fileID: 9138145860033727172}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9138145860033727100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b9d06336cab4d78ae64e9dc06d92c08, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Arkanoid.Runtime::Arkanoid.Bonus.BonusPickup

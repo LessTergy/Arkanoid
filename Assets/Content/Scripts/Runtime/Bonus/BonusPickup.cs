@@ -1,5 +1,4 @@
 using System;
-using Arkanoid.Core.Bonus;
 using Arkanoid.Core.GameFlow;
 using Arkanoid.GameFlow;
 using Arkanoid.Paddle;
@@ -21,20 +20,10 @@ namespace Arkanoid.Bonus
         private GameplayPauseController _pause;
         private bool _removed;
 
-        internal IBonusEffect Effect { get; private set; }
+        internal BonusEffect Effect { get; private set; }
 
         public event Action<BonusPickup> Collected;
         public event Action<BonusPickup> Removed;
-
-        internal void InitializeEffect(IBonusEffect effect)
-        {
-            if (Effect != null)
-            {
-                throw new InvalidOperationException("BonusPickup effect has already been initialized.");
-            }
-
-            Effect = effect ?? throw new ArgumentNullException(nameof(effect));
-        }
 
         [Inject]
         internal void Construct(
@@ -44,6 +33,7 @@ namespace Arkanoid.Bonus
             GameplayPauseController pause)
         {
             ValidateConfiguration();
+            Effect = GetComponent<BonusEffect>();
             _paddle = paddle;
             _deathZone = deathZone;
             _session = session;
@@ -62,6 +52,13 @@ namespace Arkanoid.Bonus
 
         internal void ValidateConfiguration()
         {
+            var effects = GetComponents<BonusEffect>();
+            if (effects.Length != 1 || !effects[0].enabled)
+            {
+                throw new InvalidOperationException(
+                    $"BonusPickup '{name}' requires exactly one enabled BonusEffect on the same object.");
+            }
+
             if (float.IsNaN(_fallSpeed) || float.IsInfinity(_fallSpeed) || _fallSpeed <= 0f)
             {
                 throw new InvalidOperationException("BonusPickup fall speed must be finite and positive.");

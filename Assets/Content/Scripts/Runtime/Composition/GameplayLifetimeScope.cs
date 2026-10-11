@@ -65,17 +65,7 @@ namespace Arkanoid
             builder.Register<ScoreService>(Lifetime.Singleton);
             builder.Register<UnityRandomProvider>(Lifetime.Scoped).As<IRandomProvider>();
             builder.Register<BonusDropService>(Lifetime.Scoped);
-            builder.Register<BonusEffectFactory>(Lifetime.Scoped);
             builder.Register<BonusFactory>(Lifetime.Scoped);
-            builder.Register(resolver =>
-            {
-                var paddle = resolver.Resolve<PaddleMovement>();
-                var config = resolver.Resolve<PaddleConfig>();
-                return new BonusContext(
-                    resolver.Resolve<LivesModel>(),
-                    resolver.Resolve<DoubleScoreDecorator>(),
-                    () => paddle.SetWidth(config.Width * 1.5f));
-            }, Lifetime.Scoped);
             builder.RegisterEntryPoint<GameplayPauseController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<LaunchHandler>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LifeLossHandler>(Lifetime.Scoped);

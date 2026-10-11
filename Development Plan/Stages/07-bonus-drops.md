@@ -95,7 +95,7 @@ ExpandPaddle задаёт целевую ширину от базовой, а н
 
 Factory владеет созданием через DI, gameplay-обработчик — отслеживанием активных pickups и подписками. Pickup распознаёт только назначенную платформу и DeathZone; Ball, Brick и Wall не применяют эффект. Пропуск бонуса не вызывает `DeathZone.BallEntered` и не расходует жизнь.
 
-Composite и общие `IBonusEffect`/`BonusContext` вводятся в Stage 8. Загрузка через Addressables — Stage 9; анимации/звук — Stage 11. Pooling, таймеры, стеки и новые bonus-services на будущее не входят в Stage 7.
+Первоначальный план Composite и IBonusEffect/BonusContext заменён согласованной реализацией Stage 8: компоненты BonusEffect на prefab без промежуточных definitions. Загрузка через Addressables — Stage 9; анимации/звук — Stage 11. Pooling, таймеры, стеки и новые bonus-services на будущее не входят в Stage 7.
 
 ## Проверка и настройка
 

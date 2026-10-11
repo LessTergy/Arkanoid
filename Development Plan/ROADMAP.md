@@ -10,7 +10,7 @@
 | Mechanics prototype | 2 | Платформа и качественный отскок мяча |
 | Playable MVP | 3 | Победа, поражение, жизни, простые блоки |
 | Architecture pass | 4 | Явные lifetimes и DI через VContainer |
-| Patterns complete | 8 | Decorator, Chain of Responsibility и Composite применены и обоснованы реальными механиками |
+| Bonus architecture | 8 | Уникальные бонусы добавляются компонентом и prefab; Decorator/Chain работают, отдельное применение Composite остаётся открытым |
 | Content complete | 10 | Три Addressable-уровня и полный flow |
 | Release candidate | 12 | Тесты, стабильность, отсутствие утечек |
 | Portfolio release | 13 | Build, README и видео |
@@ -29,7 +29,7 @@ feat: complete minimal game session flow
 refactor: compose gameplay services with VContainer
 feat: add composable score modifiers
 feat: process brick hits through handler chain
-feat: apply grouped bonus effects
+refactor: use prefab components for bonus effects
 feat: load level content with Addressables
 test: cover gameplay rules and level lifecycle
 docs: add architecture and verification guide

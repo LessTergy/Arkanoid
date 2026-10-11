@@ -1,29 +1,26 @@
-# Этап 8. Уникальные бонусы и общий контракт эффектов
+# Этап 8. Бонусы как компоненты префабов
 
 [Назад: этап 7](07-bonus-drops.md) · [К индексу](../README.md) · [Чек-лист настройки и приёмки](08-bonus-checklist.md) · [Архитектура](../ARCHITECTURE.md) · [Далее: этап 9](09-addressable-levels.md)
 
-**Результат:** каждый игровой бонус выполняет одно самостоятельное действие; pickup/handler применяют его через `IBonusEffect.Apply(BonusContext)`.
+**Результат:** новый бонус добавляется одним компонентом поведения, pickup-префабом и записью в таблице выпадения. Поведение вызывается через `BonusEffect.Apply()` без общего контекста и переключения типов.
 
-**Статус на 2026-10-11:** по решению пользователя удалены группирующие Rescue и Comeback. RescueBonus/RescuePickup заменены на отдельные AddLifeBonus/AddLifePickup с сохранением GUID; их эффект — только AddLifeEffect. Comeback definition/prefab и оба composite effect assets удалены вместе с `.meta`. Контент содержит ExpandPaddle, AddLife и DoubleScore. Текущий пользовательский профиль сохранён: одна запись DoubleScoreBonus, Weight=1, Chance=1. Статическая проверка не заменяет повторный импорт, тесты и ручную приёмку Unity/Android; Gate 8 открыт.
+**Статус на 2026-10-11:** пользователь согласовал упрощение по KISS. Удалены Core-обёртки эффектов, BonusContext, IBonusEffect, BonusDefinition, effect definitions/assets, BonusEffectFactory, Composite и его тесты. Эффекты теперь Runtime MonoBehaviour-компоненты на корнях трёх pickup variants. Профиль мигрирован в прямую ссылку DoubleScorePickup с сохранением Chance=1, Weight=1 и GUID. Статическая проверка C# прошла; импорт и поведение в Unity ещё не подтверждены. Gate 8 открыт.
 
 **Согласовано:** стартовые жизни 3, максимум 5, AddLife +1; при максимуме pickup потребляется. AddScoreEffect исключён: подбор не начисляет очки и не меняет combo. DoubleScore включает существующий множитель следующих начислений.
 
 ## Актуальный контент
 
-| Бонус | Effect asset | Prefab | Действие |
-|---|---|---|---|
-| ExpandPaddleBonus | ExpandPaddleEffect | BonusPickup (бирюзовый) | Базовая ширина ×1.5, без накопления |
-| AddLifeBonus | AddLifeEffect | AddLifePickup (зелёный) | Только +1 жизнь, максимум 5 |
-| DoubleScoreBonus | EnableDoubleScoreEffect | DoubleScorePickup (оранжевый) | Только флаг удвоения следующих начислений |
+| Prefab в Prefabs/Gameplay/Bonuses | Компонент на корне | Действие |
+|---|---|---|
+| ExpandPaddlePickup (бирюзовый) | ExpandPaddleEffect | Базовая ширина ×1.5, без накопления |
+| AddLifePickup (зелёный) | AddLifeEffect | Только +1 жизнь, максимум 5 |
+| DoubleScorePickup (оранжевый) | EnableDoubleScoreEffect | Только флаг удвоения следующих начислений |
 
-- Prefabs: `Assets/Content/Prefabs/Gameplay/Bonuses/`.
-- Effects: `Assets/Content/Data/Bonuses/Effects/`.
-- Bonus definitions: `Assets/Content/Data/Bonuses/Definitions/`.
-- Профиль: `Assets/Content/Data/Bonuses/BonusDropDefinition.asset`, GUID `be74f4ccb885bbf4487ab587a7d316ce`.
-- AddLifeBonus использует прежний GUID RescueBonus `fcefc0ffc8dfded190c2873e0eb30221`; AddLifePickup — прежний GUID RescuePickup `57973cc438b262d4f8f1572edcf7e519`. Существующая ссылка на бывший Rescue теперь ведёт на одиночный AddLife.
-- AddLifePickup и DoubleScorePickup — цветовые variants BonusPickup. Physics, слой Pickup и ссылки Rigidbody/Collider сохранены.
+Все три — variants `BonusPickup.prefab`. Сам BonusPickup — шаблон с общей физикой/визуалом и без BonusEffect; назначать его в drop-профиль нельзя. Эффект не назначается ссылкой Inspector: pickup находит единственный компонент на своём корне при injection. Проверка отклоняет отсутствие эффекта, несколько эффектов или disabled-компонент.
 
-После импорта проверить отсутствие Missing и запустить тесты. Настройка профиля пользователем после удаления не перезаписывается.
+Скрипты: `Assets/Content/Scripts/Runtime/Bonus/`. ScriptableObject эффектов и бонусов больше нет; папки Data/Bonuses/Effects и Definitions удалены. В `Assets/Content/Data/Bonuses/` остаётся профиль `BonusDropDefinition.asset`, GUID `be74f4ccb885bbf4487ab587a7d316ce`. GUID существующих BonusPickup/AddLifePickup/DoubleScorePickup и перенесённых скриптов эффектов сохранены; ExpandPaddlePickup создан отдельно.
+
+Повторный импорт prefabs и прямой ссылки профиля проверяет пользователь. Текущая пользовательская настройка выпадения не заменена общей таблицей.
 
 ## Контекст из Stage 7 и история изменения требований
 
@@ -31,39 +28,40 @@ Gate 7 пройден: пользователь подтвердил тесты,
 
 Первоначально Stage 8 демонстрировал Composite на Rescue = ExpandPaddle + AddLife и Comeback = Rescue + DoubleScore. Через Unity MCP были подготовлены variants и назначены definitions; профиль мигрирован без смены GUID. Решение пользователя 2026-10-11 отменяет эти два игровых бонуса и их критерии ручной приёмки.
 
-`CompositeBonusEffect`, `CompositeBonusEffectDefinition` и валидация графа сохранены как реализованный механизм обязательного паттерна проекта. Его технические тесты используют временные группы с нейтральными именами. Сохранённых composite assets и группирующих игровых бонусов нет. В текущем игровом контенте Composite не демонстрируется; его уместное применение для итоговой демонстрации остаётся отдельным вопросом, новые механики здесь не добавляются.
+Сначала пользователь отменил группирующий контент, затем согласовал удаление самого Composite и промежуточных definitions/контекста. Требования ручной вложенности и технические проверки этой удалённой схемы больше не входят в Gate 8. Исходное требование демонстрации Composite для всего портфолио остаётся отдельным вопросом; в бонусы паттерн не возвращается без реальной задачи.
 
 ## Задачи этапа
 
 Отметки, требующие проверки в Unity, остаются открытыми до подтверждения пользователя.
 
 - [x] `P8.1` Зафиксировать три самостоятельных бонуса: ExpandPaddle, AddLife, DoubleScore.
-- [ ] `P8.2` Общий Core-контракт `IBonusEffect.Apply(BonusContext)`, перенос ExpandPaddle в Core и привязка эффекта к pickup реализованы; подтвердить физику и однократность.
-- [ ] `P8.3` Независимые AddLifeEffect/EnableDoubleScoreEffect и предел LivesModel реализованы; подтвердить жизни и множитель. AddScore исключён.
-- [x] `P8.4` Зафиксировать границы Composite: технический механизм сохранён, группирующий контент отменён.
-- [ ] `P8.5` Composite с неизменяемым снимком списка и единым Apply реализован; подтвердить технические тесты порядка, вложенности и ошибок.
-- [ ] `P8.6` Effect/bonus definitions и BonusEffectFactory реализованы; подтвердить импорт и валидацию до создания pickup.
-- [ ] `P8.7` Отдельный AddLifeBonus/AddLifePickup подготовлен; подтвердить +1 до 5, потребление на максимуме и отсутствие других эффектов.
+- [ ] `P8.2` Общий Runtime-компонент BonusEffect с Apply() и автоматическое получение эффекта на корне реализованы; подтвердить физику и однократность.
+- [ ] `P8.3` AddLifeEffect/EnableDoubleScoreEffect/ExpandPaddleEffect получают только нужные зависимости через Inject; подтвердить жизни, ширину и множитель.
+- [x] `P8.4` Зафиксировать выбор компонентов префаба по KISS: один класс поведения на бонус, отсутствие общего контекста, type switch и промежуточных assets.
+- `P8.5` Отменена пользователем: механизм Composite и его тесты удалены.
+- [ ] `P8.6` Прямые prefab-ссылки в таблице, проверка физики/одного root effect и общая DI-фабрика реализованы; подтвердить импорт.
+- [ ] `P8.7` AddLifeEffect назначен на корень зелёного AddLifePickup; подтвердить +1 до 5, потребление на максимуме и отсутствие других действий.
 - `P8.8` Отменена пользователем: Rescue/Comeback и их сохранённые группы удалены; проверка вложенного игрового бонуса больше не требуется.
 - [ ] `P8.9` Отдельный DoubleScore и сброс временных модификаторов реализованы; подтвердить повторный подбор и restart.
 - [x] `P8.10` Повторный подбор: ширина всегда от базы, double — один флаг, каждое AddLife даёт +1 до максимума; таймеров нет.
 - [ ] `P8.11` EditMode/PlayMode и ручной чек-лист обновлены под уникальные бонусы; запустить и подтвердить регрессию.
-- [x] `P8.12` README обновлён: текущее содержимое и ограничение демонстрации Composite описаны.
+- [x] `P8.12` README и руководство добавления бонуса обновлены под компоненты префабов.
 - [ ] `P8.13` Weighted drop с общим шансом, валидацией и миграцией реализован; подтвердить выбор трёх независимых вариантов и player build.
 
 ## Контракты и владельцы правил
 
 ### Применение и состояние
 
-- Core содержит `IBonusEffect`, `BonusContext` и независимые эффекты. Контекст получает существующие LivesModel/DoubleScoreDecorator и Action расширения; Unity-ссылок и контейнера в Core нет.
-- ExpandPaddle вызывает callback, использующий `PaddleMovement.SetWidth(PaddleConfig.Width × 1.5)`. Sprite/collider и границы поля согласованы; повторный подбор не увеличивает ширину повторно.
-- `LivesModel.TryAddLife()` владеет максимумом 5 и событием: 3 → 4 → 5 → 5, события только [4,5]. Модель с 0 жизней не воскрешается; добавленная жизнь сохраняется при следующей потере.
-- DoubleScore включает тот же decorator, который используется ScoreService; повтор не даёт ×4. Подбор не начисляет score и не повышает combo.
-- `BonusDefinition` связывает root effect с типизированным BonusPickup prefab. Definitions не хранят состояние партии и не получают DI.
-- `BonusEffectFactory` проверяет ссылки, поддерживаемые типы, prefab physics и граф до Instantiate; не применяет effects при проверке. Пустые группы/null/циклы отклоняются; общие дочерние assets допустимы, повторные ссылки не дедуплицируются.
-- Composite копирует список и применяет записи по порядку с тем же контекстом; исключение прекращает обход. Это технический контракт, отсутствующий в сохранённом игровом контенте.
-- `BonusFactory` создаёт pickup через `IObjectResolver.Instantiate`, связывает effect до первого physics tick. Активность исходного prefab проверяется до Instantiate; Construct не требует activeSelf во время временной деактивации VContainer 1.19.
-- Pickup отклоняет null/reinitialization, удаляется до Collected и сразу отключает collider/simulation. Handler вызывает один Apply без ветвления по типу.
+- `BonusEffect : MonoBehaviour` содержит один абстрактный Apply(). Новый бонус наследует этот класс и реализует только своё действие.
+- Компоненты имеют собственные Inject-методы: ExpandPaddle получает PaddleMovement/PaddleConfig, AddLife — LivesModel, DoubleScore — существующий DoubleScoreDecorator. Общего контекста и отдельной DI-регистрации каждого effect нет.
+- Правила жизней и счёта остаются в Core-моделях. Runtime-компоненты вызывают эти модели; параметры нового бонуса могут храниться в SerializeField на его компоненте.
+- ExpandPaddle использует `PaddleMovement.SetWidth(PaddleConfig.Width × 1.5)`. Повтор не накапливает ширину, sprite/collider и границы поля согласованы.
+- LivesModel.TryAddLife владеет максимумом и событием: 3 → 4 → 5 → 5, события [4,5]; из 0 жизней не воскрешает.
+- DoubleScore включает тот же decorator, который использует ScoreService; повтор не даёт ×4. Подбор не начисляет score и не повышает combo.
+- BonusPickup проверяет ровно один enabled BonusEffect на своём корне; эффекты на дочерних объектах не подходят. Дальнейший доступ идёт через закешированный компонент.
+- BonusFactory проверяет исходный prefab, затем выполняет типизированный IObjectResolver.Instantiate. VContainer внедряет зависимости во все компоненты clone. Фабрика не знает типы конкретных бонусов и не вызывает Apply при создании.
+- Проверка activeSelf выполняется до Instantiate; Construct не требует активности во время временной деактивации VContainer 1.19.
+- Pickup удаляется до Collected, сразу отключает collider/simulation; handler вызывает один Apply(). Effect живёт вместе с pickup. Длительное действие должно принадлежать соответствующему игровому владельцу, поскольку pickup уничтожается после подбора.
 
 ### Очистка и начисление
 
@@ -73,8 +71,8 @@ Gate 7 пройден: пользователь подтвердил тесты,
 
 ### Weighted drop
 
-- Профиль содержит общий Chance в [0,1] и непустой упорядоченный Entries из `BonusDefinition + Weight`.
-- Вес конечный и строго >0; отключение варианта — удаление записи. CreateSettings проверяет всю таблицу, все эффекты и prefabs до random, включая Chance=0 и невыбранные варианты.
+- Профиль содержит общий Chance в [0,1] и непустой упорядоченный Entries из `BonusPickup PickupPrefab + Weight`.
+- Вес конечный и строго >0; отключение варианта — удаление записи. CreateSettings проверяет всю таблицу, все prefabs до random, включая Chance=0 и невыбранные варианты.
 - Core получает immutable числовой снимок. Сумма весов — double. Возвращённый индекс соответствует порядку Entries и определяет выбранную definition.
 - TrySelect сначала проверяет Chance, затем выбирает вариант. Успех при chance roll < Chance; точное равенство — отказ. Пограничные Chance=0/1 не требуют chance random.
 - Выбор использует полуоткрытые интервалы: точная внутренняя граница выбирает следующую запись; roll=0 — первую, roll=1 — последнюю. Последняя граница безопасна при округлении.
@@ -94,14 +92,14 @@ Gate 7 пройден: пользователь подтвердил тесты,
 
 ## Проверка
 
-- EditMode: BonusContentTests содержит 6 кейсов реальных assets — три независимых применения и три пары definition/effect с проверкой prefab через штатную фабрику.
-- BonusEffectFactoryTests и CompositeBonusEffectTests сохраняют технические проверки leaf/group, вложенности, снимка, общих ссылок, порядка и ошибок. Их группы не являются игровым контентом.
-- PlayMode BonusIntegrationTests проверяет три уникальных выбора, отдельный AddLife до/на максимуме, отсутствие побочных эффектов, DoubleScore до последнего начисления, физику, паузу, DeathZone, cleanup и новый scope.
+- EditMode: BonusContentTests (5) проверяет три сохранённых root effect и физическую конфигурацию через профиль, шаблон без эффекта и прямые prefab-ссылки реального профиля.
+- BonusEffectTests (3) проверяет MonoBehaviour AddLife до предела/из 0 и DoubleScore без накопления или начисления. BonusDropDefinitionTests (36) проверяет профиль, физику и неверные root effects, в том числе в невыбранной записи при Chance=0.
+- PlayMode BonusIntegrationTests (35): три уникальных выбора, физический подбор и прямой DI Instantiate; произвольный новый effect работает без регистрации/изменения фабрики. Сохранены ширина, cap жизней, DoubleScore, последнее начисление, pause/DeathZone/lifecycle/disposal/restart scope.
 - Полная ручная регрессия, два настоящих restart и Android player build выполняются пользователем по [чек-листу](08-bonus-checklist.md). Пересоздание контейнера в fixture не заменяет restart сцены; подтверждение Stage 7 не переносится автоматически на Stage 8.
 
 ## Gate 8
 
-- [ ] Pickup/handler зависят от общего IBonusEffect, физика и однократность сохранены.
+- [ ] Pickup/handler используют общий BonusEffect.Apply(), физика и однократность сохранены.
 - [ ] ExpandPaddle, AddLife и DoubleScore работают отдельно в реальном контенте, не применяют чужие действия; Rescue/Comeback отсутствуют.
 - [ ] Жизни стартуют с 3, не превышают 5 и не восстанавливаются из 0; AddLife потребляется на максимуме. Подбор не меняет score/combo.
 - [ ] DoubleScore не накапливается; lifecycle/restart не оставляют модификаторы, pickups или старые подписки; последнее начисление происходит до сброса.

@@ -6,10 +6,10 @@ namespace Arkanoid.Bonus
     [Serializable]
     public sealed class BonusDropEntry
     {
-        [SerializeField] private BonusDefinition _bonus;
+        [SerializeField] private BonusPickup _pickupPrefab;
         [SerializeField] private float _weight = 1f;
 
-        public BonusDefinition Bonus => _bonus;
+        public BonusPickup PickupPrefab => _pickupPrefab;
 
         public float Weight => _weight;
     }

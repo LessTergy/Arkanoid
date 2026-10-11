@@ -4,7 +4,7 @@
 
 ## Текущий статус
 
-- Текущий этап: [Этап 8 — уникальные бонусы и общий контракт](Stages/08-bonus-composite.md). По решению пользователя 2026-10-11 группирующие Rescue/Comeback удалены, AddLife подготовлен отдельно. В контенте ExpandPaddle, AddLife, DoubleScore; механизм Composite и его технические тесты сохранены. Текущий профиль пользователя не перезаписан: DoubleScoreBonus, Weight=1, Chance=1. Импорт после правки, тесты, ручная приёмка и Android ожидаются по [чек-листу](Stages/08-bonus-checklist.md); Gate 8 открыт.
+- Текущий этап: [Этап 8 — компоненты бонусов](Stages/08-bonus-composite.md). Согласованный KISS-рефакторинг выполнен в коде/контенте: один компонент BonusEffect на pickup, прямые prefab-ссылки в weighted table; контекст, definitions/assets и Composite удалены. Профиль мигрирован без изменения Chance=1, Weight=1: DoubleScorePickup. C# проверен статически; импорт, тесты, ручная приёмка и Android ожидаются по [чек-листу](Stages/08-bonus-checklist.md), Gate 8 открыт.
 - [Этап 7 — выпадение и подбор бонусов](Stages/07-bonus-drops.md) завершён: `P7.1–P7.8` выполнены, Gate 7 пройден. Пользователь подтвердил тесты, ручную регрессию и работу Android build на смартфоне 2026-10-10; результаты зафиксированы в [чек-листе](Stages/07-bonus-checklist.md). ExpandPaddle — ×1,5 без накопления; LifeLost и терминальные состояния очищают pickups и возвращают базовую ширину.
 - Ревью Stage 6 выполнено: добавлены контекст текущего кода, миграция `Basic`, инварианты и регрессионные проверки. Пользователь подтвердил урон `1`, HP `1–5` и стартовые параметры четырёх контентных пресетов; модель параметрическая. Огненный мяч исключён из текущего объёма.
 - Этап 0 завершён: 15 из 15 задач, Gate 0 пройден.
@@ -20,6 +20,7 @@
 
 - [Цель, scope и Definition of Done](SCOPE.md)
 - [Архитектура и обязательные паттерны](ARCHITECTURE.md)
+- [Как добавить новый бонус: скрипт → prefab → таблица дропа](ADDING_BONUS.md)
 - [Milestones, коммиты и идеи после релиза](ROADMAP.md)
 
 ## Этапы
@@ -34,7 +35,7 @@
 | [5](Stages/05-score-decorator.md) | Счёт через Decorator | Завершён |
 | [6](Stages/06-brick-hit-chain.md) | Brick hits через Chain of Responsibility | Завершён |
 | [7](Stages/07-bonus-drops.md) | Выпадение и подбор бонусов | Завершён |
-| [8](Stages/08-bonus-composite.md) | Уникальные бонусы и общий контракт эффектов | Контент обновлён; приёмка Unity и Android ожидается |
+| [8](Stages/08-bonus-composite.md) | Бонусы как компоненты префабов | Контент обновлён; приёмка Unity и Android ожидается |
 | [9](Stages/09-addressable-levels.md) | Data-driven Addressable-уровни | Не начат |
 | [10](Stages/10-game-flow-ui.md) | Полный игровой flow и UI | Не начат |
 | [11](Stages/11-feedback-audio.md) | Feedback, DOTween и звук | Не начат |

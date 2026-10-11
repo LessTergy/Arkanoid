@@ -12,8 +12,6 @@ namespace Arkanoid.Tests.EditMode
     public sealed class BonusDropDefinitionTests
     {
         private BonusDropDefinition _drop;
-        private BonusDefinition _bonus;
-        private ExpandPaddleEffectDefinition _effect;
         private BrickDefinition _brick;
         private BonusPickup _pickup;
         private Rigidbody2D _body;
@@ -32,11 +30,8 @@ namespace Arkanoid.Tests.EditMode
             _pickup = pickupObject.AddComponent<BonusPickup>();
             SetField(_pickup, "_rigidbody", _body);
             SetField(_pickup, "_collider", _collider);
-            _bonus = ScriptableObject.CreateInstance<BonusDefinition>();
-            _effect = ScriptableObject.CreateInstance<ExpandPaddleEffectDefinition>();
-            SetField(_bonus, "_effect", _effect);
-            SetField(_bonus, "_pickupPrefab", _pickup);
-            SetEntries(Entry(_bonus));
+            pickupObject.AddComponent<ExpandPaddleEffect>();
+            SetEntries(Entry(_pickup));
         }
 
         [TearDown]
@@ -45,8 +40,6 @@ namespace Arkanoid.Tests.EditMode
             Object.DestroyImmediate(_body.gameObject);
             Object.DestroyImmediate(_brick);
             Object.DestroyImmediate(_drop);
-            Object.DestroyImmediate(_bonus);
-            Object.DestroyImmediate(_effect);
         }
 
         [Test]
@@ -60,21 +53,20 @@ namespace Arkanoid.Tests.EditMode
         [Test]
         public void AssignedProfile_CreatesIndependentNumericSnapshotAndKeepsPrefabInRuntime()
         {
-            SetField(_bonus, "_pickupPrefab", _pickup);
             SetField(_brick, "_bonusDrop", _drop);
 
             var snapshot = _brick.CreateDropSettings();
 
             Assert.That(snapshot.Chance, Is.EqualTo(0.25f));
             Assert.That(_brick.BonusDrop, Is.SameAs(_drop));
-            Assert.That(_bonus.PickupPrefab, Is.SameAs(_pickup));
+            Assert.That(_drop.Entries[0].PickupPrefab, Is.SameAs(_pickup));
             Assert.That(_brick.CreateSettings().MaxHealth, Is.EqualTo(1));
 
             SetField(_drop, "_chance", 1f);
 
             Assert.That(snapshot.Chance, Is.EqualTo(0.25f));
             Assert.That(_brick.CreateDropSettings().Chance, Is.EqualTo(1f));
-            Assert.That(_bonus.PickupPrefab, Is.SameAs(_pickup));
+            Assert.That(_drop.Entries[0].PickupPrefab, Is.SameAs(_pickup));
         }
 
         [TestCase(0f)]
@@ -82,14 +74,14 @@ namespace Arkanoid.Tests.EditMode
         [TestCase(1f)]
         public void AssignedProfile_WithoutPrefab_IsRejectedEvenAtZeroChance(float chance)
         {
-            SetField(_bonus, "_pickupPrefab", null);
+            SetEntries(Entry(null));
             SetField(_drop, "_chance", chance);
             SetField(_brick, "_bonusDrop", _drop);
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
             Assert.Throws<InvalidOperationException>(() => _brick.CreateDropSettings());
             Assert.Throws<InvalidOperationException>(() => _brick.CreateSettings());
-            Assert.That(_bonus.PickupPrefab, Is.Null);
+            Assert.That(_drop.Entries[0].PickupPrefab, Is.Null);
         }
 
         [TestCase(-0.01f)]
@@ -100,20 +92,18 @@ namespace Arkanoid.Tests.EditMode
         public void AssignedProfile_InvalidChance_IsRejectedWithoutRepairingAsset(float chance)
         {
             SetField(_drop, "_chance", chance);
-            SetField(_bonus, "_pickupPrefab", _pickup);
             SetField(_brick, "_bonusDrop", _drop);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => _drop.CreateSettings());
             Assert.Throws<ArgumentOutOfRangeException>(() => _brick.CreateDropSettings());
             Assert.Throws<ArgumentOutOfRangeException>(() => _brick.CreateSettings());
-            Assert.That(_bonus.PickupPrefab, Is.SameAs(_pickup));
+            Assert.That(_drop.Entries[0].PickupPrefab, Is.SameAs(_pickup));
             Assert.That(GetField(_drop, "_chance"), Is.EqualTo(chance));
         }
 
         [Test]
         public void AssignedProfile_DestroyedPickupReference_IsRejected()
         {
-            SetField(_bonus, "_pickupPrefab", _pickup);
             Object.DestroyImmediate(_pickup);
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
@@ -125,7 +115,6 @@ namespace Arkanoid.Tests.EditMode
         {
             _collider.isTrigger = isTrigger;
             _body.bodyType = bodyType;
-            SetField(_bonus, "_pickupPrefab", _pickup);
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
         }
@@ -134,7 +123,6 @@ namespace Arkanoid.Tests.EditMode
         public void AssignedProfile_InactivePrefab_IsRejectedWithoutActivatingIt()
         {
             _pickup.gameObject.SetActive(false);
-            SetField(_bonus, "_pickupPrefab", _pickup);
             SetField(_brick, "_bonusDrop", _drop);
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
@@ -149,7 +137,6 @@ namespace Arkanoid.Tests.EditMode
         public void AssignedProfile_InvalidFallSpeed_IsRejected(float speed)
         {
             SetField(_pickup, "_fallSpeed", speed);
-            SetField(_bonus, "_pickupPrefab", _pickup);
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
         }
@@ -159,7 +146,6 @@ namespace Arkanoid.Tests.EditMode
         public void AssignedProfile_MissingPhysicsReference_IsRejected(string field)
         {
             SetField(_pickup, field, null);
-            SetField(_bonus, "_pickupPrefab", _pickup);
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
         }
@@ -176,7 +162,6 @@ namespace Arkanoid.Tests.EditMode
                 var collider = otherObject.AddComponent<BoxCollider2D>();
                 collider.isTrigger = true;
                 SetField(_pickup, field, field == "_rigidbody" ? (Component)body : collider);
-                SetField(_bonus, "_pickupPrefab", _pickup);
 
                 Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
             }
@@ -197,10 +182,10 @@ namespace Arkanoid.Tests.EditMode
 
         [TestCase(false)]
         [TestCase(true)]
-        public void NullEntryOrBonus_IsRejectedAtZeroChance(bool nullEntry)
+        public void NullEntryOrPrefab_IsRejectedAtZeroChance(bool nullEntry)
         {
             SetField(_drop, "_chance", 0f);
-            SetEntries(Entry(_bonus), nullEntry ? null : Entry(null));
+            SetEntries(Entry(_pickup), nullEntry ? null : Entry(null));
 
             Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
         }
@@ -212,8 +197,8 @@ namespace Arkanoid.Tests.EditMode
         public void InvalidWeight_IsRejectedAtZeroChanceWithoutRepair(float weight)
         {
             SetField(_drop, "_chance", 0f);
-            var entry = Entry(_bonus, weight);
-            SetEntries(Entry(_bonus), entry);
+            var entry = Entry(_pickup, weight);
+            SetEntries(Entry(_pickup), entry);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => _drop.CreateSettings());
             Assert.That(entry.Weight, Is.EqualTo(weight));
@@ -223,33 +208,44 @@ namespace Arkanoid.Tests.EditMode
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
-        public void UnselectedInvalidBonus_IsRejectedEvenAtZeroChance(int kind)
+        [TestCase(4)]
+        public void UnselectedInvalidPrefab_IsRejectedEvenAtZeroChance(int kind)
         {
-            var bonus = ScriptableObject.CreateInstance<BonusDefinition>();
-            var group = ScriptableObject.CreateInstance<CompositeBonusEffectDefinition>();
+            var instance = new GameObject("Unselected pickup");
             try
             {
-                SetField(bonus, "_pickupPrefab", _pickup);
-                SetField(bonus, "_effect", _effect);
+                var body = instance.AddComponent<Rigidbody2D>();
+                body.bodyType = RigidbodyType2D.Kinematic;
+                var collider = instance.AddComponent<BoxCollider2D>();
+                collider.isTrigger = true;
+                var pickup = instance.AddComponent<BonusPickup>();
+                SetField(pickup, "_rigidbody", body);
+                SetField(pickup, "_collider", collider);
+                var effect = instance.AddComponent<AddLifeEffect>();
                 switch (kind)
                 {
                     case 0:
-                        SetField(bonus, "_effect", null);
+                        Object.DestroyImmediate(effect);
                         break;
                     case 1:
-                        SetField(bonus, "_pickupPrefab", null);
+                        effect.enabled = false;
                         break;
                     case 2:
-                        SetField(bonus, "_effect", group);
+                        instance.AddComponent<EnableDoubleScoreEffect>();
                         break;
                     case 3:
-                        SetField(group, "_effects", new List<BonusEffectDefinition> { group });
-                        SetField(bonus, "_effect", group);
+                        instance.SetActive(false);
+                        break;
+                    case 4:
+                        Object.DestroyImmediate(effect);
+                        var child = new GameObject("Child effect");
+                        child.transform.SetParent(instance.transform);
+                        child.AddComponent<AddLifeEffect>();
                         break;
                 }
 
                 SetField(_drop, "_chance", 0f);
-                SetEntries(Entry(_bonus), Entry(bonus));
+                SetEntries(Entry(_pickup), Entry(pickup));
 
                 Assert.Throws<InvalidOperationException>(() => _drop.CreateSettings());
                 SetField(_brick, "_bonusDrop", _drop);
@@ -257,16 +253,15 @@ namespace Arkanoid.Tests.EditMode
             }
             finally
             {
-                Object.DestroyImmediate(group);
-                Object.DestroyImmediate(bonus);
+                Object.DestroyImmediate(instance);
             }
         }
 
         [Test]
         public void Settings_CopyEntryWeightsInOrder()
         {
-            var entry = Entry(_bonus, 3f);
-            SetEntries(Entry(_bonus), entry);
+            var entry = Entry(_pickup, 3f);
+            SetEntries(Entry(_pickup), entry);
             var snapshot = _drop.CreateSettings();
             SetField(entry, "_weight", 10f);
 
@@ -279,10 +274,10 @@ namespace Arkanoid.Tests.EditMode
             SetField(_drop, "_entries", new List<BonusDropEntry>(entries));
         }
 
-        private static BonusDropEntry Entry(BonusDefinition bonus, float weight = 1f)
+        private static BonusDropEntry Entry(BonusPickup prefab, float weight = 1f)
         {
             var entry = new BonusDropEntry();
-            SetField(entry, "_bonus", bonus);
+            SetField(entry, "_pickupPrefab", prefab);
             SetField(entry, "_weight", weight);
             return entry;
         }

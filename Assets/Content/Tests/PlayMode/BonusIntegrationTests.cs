@@ -43,7 +43,6 @@ namespace Arkanoid.Tests.PlayMode
         private GameplayPauseController _pause;
         private GameplayBonusHandler _handler;
         private ExpandPaddleEffect _effect;
-        private BonusContext _context;
         private LivesModel _lives;
         private DoubleScoreDecorator _doubleScore;
         private GameplayScoreHandler _scoreHandler;
@@ -52,7 +51,6 @@ namespace Arkanoid.Tests.PlayMode
         private RecordingRandom _random;
         private IObjectResolver _resolver;
         private float _previousTimeScale;
-        private readonly List<ScriptableObject> _bonusAssets = new();
 
         [SetUp]
         public void SetUp()
@@ -87,19 +85,9 @@ namespace Arkanoid.Tests.PlayMode
             _pause = new GameplayPauseController(inputObject.AddComponent<InputSystemPlayerInput>(), _session);
             _pause.Start();
             _level = NewObject("Level").AddComponent<LevelView>();
-            var template = NewObject("Pickup template");
-            template.transform.localPosition = new Vector3(0f, 30f, 0f);
-            var pickupBody = template.AddComponent<Rigidbody2D>();
-            pickupBody.bodyType = RigidbodyType2D.Kinematic;
-            var pickupCollider = template.AddComponent<BoxCollider2D>();
-            pickupCollider.isTrigger = true;
-            var pickup = template.AddComponent<BonusPickup>();
-            SetField(pickup, "_rigidbody", pickupBody);
-            SetField(pickup, "_collider", pickupCollider);
-            pickup.Construct(_paddle, _deathZone, new GameSession(), _pause);
+            _pickupTemplate = CreatePickupTemplate<ExpandPaddleEffect>();
             _drop = ScriptableObject.CreateInstance<BonusDropDefinition>();
-            _pickupTemplate = pickup;
-            SetProfile(CreateBonusDefinition(NewBonusAsset<ExpandPaddleEffectDefinition>()));
+            SetProfile(_pickupTemplate);
             _definition = ScriptableObject.CreateInstance<BrickDefinition>();
             SetField(_definition, "_bonusDrop", _drop);
             _bricks = new[] { CreateBrick(), CreateBrick(), CreateBrick() };
@@ -121,12 +109,6 @@ namespace Arkanoid.Tests.PlayMode
             Object.DestroyImmediate(_config);
             Object.DestroyImmediate(_sprite);
             Object.DestroyImmediate(_texture);
-            foreach (var asset in _bonusAssets)
-            {
-                Object.DestroyImmediate(asset);
-            }
-
-            _bonusAssets.Clear();
             Time.timeScale = _previousTimeScale;
         }
 
@@ -209,8 +191,9 @@ namespace Arkanoid.Tests.PlayMode
         [TestCase(true)]
         public void AssignedInvalidTable_IsRejectedBeforeRandomAndPickupCreation(bool zeroChance)
         {
-            var invalid = CreateBonusDefinition(CreateEffectGroup());
-            SetProfile(CreateBonusDefinition(NewBonusAsset<ExpandPaddleEffectDefinition>()), invalid);
+            var invalid = CreatePickupTemplate<AddLifeEffect>();
+            Object.DestroyImmediate(invalid.GetComponent<BonusEffect>());
+            SetProfile(CreatePickupTemplate<ExpandPaddleEffect>(), invalid);
             SetField(_drop, "_chance", zeroChance ? 0f : 1f);
             _session.TryStartPlaying();
 
@@ -223,8 +206,8 @@ namespace Arkanoid.Tests.PlayMode
         public void FailedChance_SkipsSelectionAndCreationForSeveralEntries()
         {
             SetProfile(
-                CreateBonusDefinition(NewBonusAsset<ExpandPaddleEffectDefinition>()),
-                CreateBonusDefinition(NewBonusAsset<EnableDoubleScoreEffectDefinition>()));
+                CreatePickupTemplate<ExpandPaddleEffect>(),
+                CreatePickupTemplate<EnableDoubleScoreEffect>());
             _random.Value = 0.25f;
             _session.TryStartPlaying();
             _bricks[0].Hit();
@@ -234,7 +217,7 @@ namespace Arkanoid.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ExpandPaddleDefinition_BindsEffectAndCollectsOnceWithoutChangingScore()
+        public IEnumerator ExpandPaddlePrefab_InjectsEffectAndCollectsOnceWithoutChangingScore()
         {
             _session.TryStartPlaying();
             _bricks[0].Hit();
@@ -256,7 +239,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator DoubleScorePickup_UsesScoreCalculatorAndResetsBeforeNextLife()
         {
-            SetProfile(CreateBonusDefinition(NewBonusAsset<EnableDoubleScoreEffectDefinition>()));
+            SetProfile(CreatePickupTemplate<EnableDoubleScoreEffect>());
             _session.TryStartPlaying();
             _bricks[0].Hit();
 
@@ -286,7 +269,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator DoubleScorePickup_AtComboThreeMakesNextAwardEightHundred()
         {
-            SetProfile(CreateBonusDefinition(NewBonusAsset<EnableDoubleScoreEffectDefinition>()));
+            SetProfile(CreatePickupTemplate<EnableDoubleScoreEffect>());
             _session.TryStartPlaying();
             _bricks[0].Hit();
             _combo.Advance();
@@ -303,9 +286,9 @@ namespace Arkanoid.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator AddLifeDefinition_PhysicalPickupAddsOnlyLifeWithoutChangingScore()
+        public IEnumerator AddLifePrefab_PhysicalPickupAddsOnlyLifeWithoutChangingScore()
         {
-            var definition = CreateBonusDefinition(NewBonusAsset<AddLifeEffectDefinition>());
+            var definition = CreatePickupTemplate<AddLifeEffect>();
             SetProfile(definition);
             _session.TryStartPlaying();
             for (var i = 0; i < 2; i++)
@@ -327,7 +310,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator AddLifePickup_AtMaximumLivesIsConsumedWithoutChangingOtherRules()
         {
-            var bonus = CreateBonusDefinition(NewBonusAsset<AddLifeEffectDefinition>());
+            var bonus = CreatePickupTemplate<AddLifeEffect>();
             SetProfile(bonus);
             _lives.TryAddLife();
             _lives.TryAddLife();
@@ -354,7 +337,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator DoubleScorePickup_DoublesLastAwardBeforeTerminalReset()
         {
-            SetProfile(CreateBonusDefinition(NewBonusAsset<EnableDoubleScoreEffectDefinition>()));
+            SetProfile(CreatePickupTemplate<EnableDoubleScoreEffect>());
             _session.TryStartPlaying();
             _bricks[0].Hit();
 
@@ -374,52 +357,76 @@ namespace Arkanoid.Tests.PlayMode
             Assert.That(_lives.RemainingLives, Is.EqualTo(3));
         }
 
-        [Test]
-        public void PickupEffect_RejectsNullAndReplacement()
+        [UnityTest]
+        public IEnumerator CustomEffect_IsInjectedWithoutRegistrationAndCollectedOnce()
         {
-            Assert.Throws<ArgumentNullException>(() => _pickupTemplate.InitializeEffect(null));
+            var prefab = CreatePickupTemplate<RecordingBonusEffect>();
+            SetProfile(prefab);
             _session.TryStartPlaying();
             _bricks[0].Hit();
             var pickup = OnlyPickup();
-            Assert.Throws<InvalidOperationException>(() => pickup.InitializeEffect(new AddLifeEffect()));
-            Assert.That(pickup.Effect, Is.TypeOf<ExpandPaddleEffect>());
+            var effect = pickup.GetComponent<RecordingBonusEffect>();
+            var collections = 0;
+            pickup.Collected += _ => collections++;
+            Assert.That(effect.ApplyCount, Is.Zero);
+            Assert.That(_lives.RemainingLives, Is.EqualTo(3));
+
+            yield return CollectPickup(pickup);
+
+            Assert.That(collections, Is.EqualTo(1));
+            Assert.That(_lives.RemainingLives, Is.EqualTo(4));
+            Assert.That(prefab.GetComponent<RecordingBonusEffect>().ApplyCount, Is.Zero);
+            Assert.That(_paddle.Width, Is.EqualTo(_config.Width));
+            Assert.That(_doubleScore.IsEnabled, Is.False);
+            Assert.That(_score.Total, Is.EqualTo(100));
+            Assert.That(_combo.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void PickupEffect_IsOwnedByTheSpawnedObject()
+        {
+            _session.TryStartPlaying();
+            _bricks[0].Hit();
+            var pickup = OnlyPickup();
+
+            Assert.That(pickup.Effect, Is.SameAs(pickup.GetComponent<ExpandPaddleEffect>()));
+            Assert.That(pickup.Effect, Is.Not.SameAs(_pickupTemplate.GetComponent<ExpandPaddleEffect>()));
         }
 
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
-        public void Factory_InvalidBonusDefinitionIsRejectedBeforeCreatingPickup(int kind)
+        public void Factory_InvalidPrefabIsRejectedBeforeCreatingPickup(int kind)
         {
-            var definition = CreateBonusDefinition(NewBonusAsset<AddLifeEffectDefinition>());
+            var prefab = CreatePickupTemplate<AddLifeEffect>();
+            var effect = prefab.GetComponent<AddLifeEffect>();
             switch (kind)
             {
                 case 0:
-                    SetField(definition, "_pickupPrefab", null);
+                    Object.DestroyImmediate(effect);
                     break;
                 case 1:
-                    SetField(definition, "_effect", CreateEffectGroup());
+                    effect.enabled = false;
                     break;
                 case 2:
-                    var group = CreateEffectGroup();
-                    SetField(group, "_effects", new List<BonusEffectDefinition> { group });
-                    SetField(definition, "_effect", group);
+                    prefab.gameObject.AddComponent<EnableDoubleScoreEffect>();
                     break;
                 case 3:
-                    _pickupTemplate.gameObject.SetActive(false);
+                    prefab.gameObject.SetActive(false);
                     break;
             }
 
-            Assert.Throws<InvalidOperationException>(() => _resolver.Resolve<BonusFactory>().Create(definition, Vector3.zero));
+            Assert.Throws<InvalidOperationException>(() => _resolver.Resolve<BonusFactory>().Create(prefab, Vector3.zero));
             Assert.That(_level.GetComponentsInChildren<BonusPickup>(), Is.Empty);
             Assert.That(_lives.RemainingLives, Is.EqualTo(3));
             Assert.That(_doubleScore.IsEnabled, Is.False);
         }
 
         [UnityTest]
-        public IEnumerator Factory_BonusDefinitionCreatesInjectedPickupWithEffectAtRequestedPosition()
+        public IEnumerator Factory_PrefabCreatesInjectedPickupWithEffectAtRequestedPosition()
         {
-            var bonus = CreateBonusDefinition(NewBonusAsset<AddLifeEffectDefinition>());
+            var bonus = CreatePickupTemplate<AddLifeEffect>();
             var position = new Vector3(101f, 5f, 0f);
             var pickup = _resolver.Resolve<BonusFactory>().Create(bonus, position);
 
@@ -428,7 +435,7 @@ namespace Arkanoid.Tests.PlayMode
             Assert.That(pickup.gameObject.activeSelf, Is.True);
             Assert.That(_pickupTemplate.gameObject.activeSelf, Is.True);
             Assert.That(pickup.GetComponent<Rigidbody2D>().simulated, Is.True);
-            pickup.Effect.Apply(_context);
+            pickup.Effect.Apply();
             Assert.That(_paddle.Width, Is.EqualTo(_config.Width));
             Assert.That(_lives.RemainingLives, Is.EqualTo(4));
             pickup.Remove();
@@ -437,10 +444,10 @@ namespace Arkanoid.Tests.PlayMode
         }
 
         [Test]
-        public void Factory_NullEffectIsRejectedBeforeCreatingPickup()
+        public void Factory_NullPrefabIsRejectedBeforeCreatingPickup()
         {
             var factory = _resolver.Resolve<BonusFactory>();
-            Assert.Throws<ArgumentNullException>(() => factory.Create(_pickupTemplate, Vector3.zero, null));
+            Assert.Throws<ArgumentNullException>(() => factory.Create(null, Vector3.zero));
             Assert.That(_level.GetComponentsInChildren<BonusPickup>(), Is.Empty);
         }
 
@@ -474,7 +481,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator MissedPickup_IsRemovedWithoutBallEnteredOrExpansion()
         {
-            SetProfile(CreateBonusDefinition(NewBonusAsset<AddLifeEffectDefinition>()));
+            SetProfile(CreatePickupTemplate<AddLifeEffect>());
             _session.TryStartPlaying();
             _bricks[0].Hit();
             var total = _score.Total;
@@ -499,7 +506,7 @@ namespace Arkanoid.Tests.PlayMode
         [UnityTest]
         public IEnumerator Pause_StopsFallAndCollectionUntilResume()
         {
-            SetProfile(CreateBonusDefinition(NewBonusAsset<AddLifeEffectDefinition>()));
+            SetProfile(CreatePickupTemplate<AddLifeEffect>());
             _session.TryStartPlaying();
             _bricks[0].Hit();
             var pickup = OnlyPickup();
@@ -551,8 +558,8 @@ namespace Arkanoid.Tests.PlayMode
             var body = _paddle.GetComponent<Rigidbody2D>();
             body.position = new Vector2(_camera.WorldBounds.center.x + side * 10f, -7f);
 
-            _effect.Apply(_context);
-            _effect.Apply(_context);
+            _effect.Apply();
+            _effect.Apply();
 
             var bounds = _camera.WorldBounds;
             var expectedX = (side < 0f ? bounds.xMin + 1.5f : bounds.xMax - 1.5f) - 0.25f * scale;
@@ -576,8 +583,8 @@ namespace Arkanoid.Tests.PlayMode
             _session.TryStartPlaying();
             _bricks[0].Hit();
             var pickup = OnlyPickup();
-            _effect.Apply(_context);
-            new EnableDoubleScoreEffect().Apply(_context);
+            _effect.Apply();
+            EnableDoubleScore();
             _lives.TryAddLife();
             var total = _score.Total;
             var lifeLostEvents = 0;
@@ -634,8 +641,8 @@ namespace Arkanoid.Tests.PlayMode
                 Assert.That(lives.RemainingLives, Is.EqualTo(1));
                 _bricks[0].Hit();
                 var pickup = OnlyPickup();
-                _effect.Apply(_context);
-                new EnableDoubleScoreEffect().Apply(_context);
+                _effect.Apply();
+                EnableDoubleScore();
                 var total = _score.Total;
                 var resetAtLifeLost = false;
                 _session.StateChanged += state =>
@@ -691,8 +698,8 @@ namespace Arkanoid.Tests.PlayMode
             _bricks[1].Hit();
             var pickups = _level.GetComponentsInChildren<BonusPickup>();
             Assert.That(pickups.Length, Is.EqualTo(2));
-            _effect.Apply(_context);
-            new EnableDoubleScoreEffect().Apply(_context);
+            _effect.Apply();
+            EnableDoubleScore();
             _pause.TogglePause();
             var total = _score.Total;
             var combo = _combo.Count;
@@ -723,16 +730,16 @@ namespace Arkanoid.Tests.PlayMode
                 _bricks[round].Hit();
                 var pickup = OnlyPickup();
                 Assert.That(_random.Calls, Is.EqualTo(round + 1));
-                var previousContext = _context;
+                var previousLives = _lives;
                 _lives.TryAddLife();
-                new EnableDoubleScoreEffect().Apply(_context);
+                EnableDoubleScore();
                 _resolver.Dispose();
                 _resolver = null;
                 Assert.That(pickup.GetComponent<Rigidbody2D>().simulated, Is.False);
                 yield return null;
                 Assert.That(pickup == null, Is.True);
                 BuildBonusScope();
-                Assert.That(_context, Is.Not.SameAs(previousContext));
+                Assert.That(_lives, Is.Not.SameAs(previousLives));
                 Assert.That(_lives.RemainingLives, Is.EqualTo(3));
                 Assert.That(_doubleScore.IsEnabled, Is.False);
                 Assert.That(_score.Total, Is.Zero);
@@ -790,36 +797,36 @@ namespace Arkanoid.Tests.PlayMode
             }
         }
 
-        private T NewBonusAsset<T>() where T : ScriptableObject
+        private BonusPickup CreatePickupTemplate<T>() where T : BonusEffect
         {
-            var asset = ScriptableObject.CreateInstance<T>();
-            _bonusAssets.Add(asset);
-            return asset;
+            var template = NewObject(typeof(T).Name + " template");
+            template.transform.localPosition = new Vector3(0f, 30f, 0f);
+            var body = template.AddComponent<Rigidbody2D>();
+            body.bodyType = RigidbodyType2D.Kinematic;
+            var collider = template.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            template.AddComponent<T>();
+            var pickup = template.AddComponent<BonusPickup>();
+            SetField(pickup, "_rigidbody", body);
+            SetField(pickup, "_collider", collider);
+            pickup.Construct(_paddle, _deathZone, new GameSession(), _pause);
+            return pickup;
         }
 
-        private CompositeBonusEffectDefinition CreateEffectGroup(params BonusEffectDefinition[] effects)
+        private void EnableDoubleScore()
         {
-            var group = NewBonusAsset<CompositeBonusEffectDefinition>();
-            SetField(group, "_effects", new List<BonusEffectDefinition>(effects));
-            return group;
-        }
-
-        private BonusDefinition CreateBonusDefinition(BonusEffectDefinition effect)
-        {
-            var definition = NewBonusAsset<BonusDefinition>();
-            SetField(definition, "_effect", effect);
-            SetField(definition, "_pickupPrefab", _pickupTemplate);
-            return definition;
+            var effect = CreatePickupTemplate<EnableDoubleScoreEffect>().GetComponent<EnableDoubleScoreEffect>();
+            effect.Construct(_doubleScore);
+            effect.Apply();
         }
 
         private IEnumerator CollectWeightedBonus(int expectedIndex, float selectionRoll)
         {
-            var expand = NewBonusAsset<ExpandPaddleEffectDefinition>();
-            var life = NewBonusAsset<AddLifeEffectDefinition>();
-            var doubleScore = NewBonusAsset<EnableDoubleScoreEffectDefinition>();
             var bonuses = new[]
             {
-                CreateBonusDefinition(expand), CreateBonusDefinition(life), CreateBonusDefinition(doubleScore)
+                CreatePickupTemplate<ExpandPaddleEffect>(),
+                CreatePickupTemplate<AddLifeEffect>(),
+                CreatePickupTemplate<EnableDoubleScoreEffect>()
             };
             var entries = new List<BonusDropEntry>();
             for (var i = 0; i < bonuses.Length; i++)
@@ -854,21 +861,21 @@ namespace Arkanoid.Tests.PlayMode
             Assert.That(_level.GetComponentsInChildren<BonusPickup>(), Is.Empty);
         }
 
-        private void SetProfile(params BonusDefinition[] bonuses)
+        private void SetProfile(params BonusPickup[] prefabs)
         {
             var entries = new List<BonusDropEntry>();
-            foreach (var bonus in bonuses)
+            foreach (var prefab in prefabs)
             {
-                entries.Add(CreateEntry(bonus));
+                entries.Add(CreateEntry(prefab));
             }
 
             SetField(_drop, "_entries", entries);
         }
 
-        private static BonusDropEntry CreateEntry(BonusDefinition bonus, float weight = 1f)
+        private static BonusDropEntry CreateEntry(BonusPickup prefab, float weight = 1f)
         {
             var entry = new BonusDropEntry();
-            SetField(entry, "_bonus", bonus);
+            SetField(entry, "_pickupPrefab", prefab);
             SetField(entry, "_weight", weight);
             return entry;
         }
@@ -897,24 +904,19 @@ namespace Arkanoid.Tests.PlayMode
             builder.RegisterInstance(_level);
             builder.RegisterInstance(_random).As<IRandomProvider>();
             builder.Register<BonusDropService>(Lifetime.Scoped);
-            builder.Register<BonusEffectFactory>(Lifetime.Scoped);
             builder.Register<BonusFactory>(Lifetime.Scoped);
-            _effect = new ExpandPaddleEffect();
             builder.Register<LivesModel>(Lifetime.Scoped);
             builder.Register<ComboModel>(Lifetime.Scoped);
             builder.Register(resolver => new DoubleScoreDecorator(
                 new ComboScoreDecorator(new BaseScoreCalculator(), resolver.Resolve<ComboModel>())), Lifetime.Scoped)
                 .AsSelf().As<IScoreCalculator>();
             builder.Register<ScoreService>(Lifetime.Scoped);
-            builder.Register(resolver => new BonusContext(
-                resolver.Resolve<LivesModel>(),
-                resolver.Resolve<DoubleScoreDecorator>(),
-                () => _paddle.SetWidth(_config.Width * 1.5f)), Lifetime.Scoped);
             builder.Register<GameplayBonusHandler>(Lifetime.Scoped);
             builder.Register<GameplayScoreHandler>(Lifetime.Scoped);
             _resolver = builder.Build();
             _handler = _resolver.Resolve<GameplayBonusHandler>();
-            _context = _resolver.Resolve<BonusContext>();
+            _effect = _pickupTemplate.GetComponent<ExpandPaddleEffect>();
+            _effect.Construct(_paddle, _config);
             _lives = _resolver.Resolve<LivesModel>();
             _doubleScore = _resolver.Resolve<DoubleScoreDecorator>();
             _combo = _resolver.Resolve<ComboModel>();

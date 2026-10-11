@@ -23,7 +23,7 @@ namespace Arkanoid.Bonus
             var weights = new float[_entries.Count];
             for (var i = 0; i < weights.Length; i++)
             {
-                if (_entries[i] == null || _entries[i].Bonus == null)
+                if (_entries[i] == null || _entries[i].PickupPrefab == null)
                 {
                     throw new InvalidOperationException($"Bonus drop definition '{name}' has an unassigned entry at {i}.");
                 }
@@ -32,10 +32,9 @@ namespace Arkanoid.Bonus
             }
 
             var settings = new BonusDropSettings(_chance, weights);
-            var effectFactory = new BonusEffectFactory();
             foreach (var entry in _entries)
             {
-                effectFactory.Create(entry.Bonus);
+                entry.PickupPrefab.ValidatePrefabConfiguration();
             }
 
             return settings;
